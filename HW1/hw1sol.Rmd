@@ -9,6 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+
 ## Q1. Git/GitHub
 
 **No handwritten homework reports are accepted for this course.** We work with Git and GitHub. Efficient and abundant use of Git, e.g., frequent and well-documented commits, is an important criterion for grading your homework.
@@ -29,7 +30,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 **Solution:** Here is a screenshot of my completion report.
 <p align="center">
-  <img src="./Completion Report.png" height="450" width="700">
+  <img src="./Completion Report.png" height="350" width="500">
 </p>
 
 2. The `/home/203bdata/mimic-iii/` folder on teaching server contains data sets from MIMIC-III. See <https://mimic.physionet.org/mimictables/admissions/> for details of each table.  
@@ -47,9 +48,32 @@ Please, do **not** put these data files into Git; they are big. Also do **not** 
         ls $datafile
       done
     ```
+    
+    ```{bash}
+    for datafile in /home/203bdata/mimic-iii/*.csv
+      do
+        ls $datafile
+      done
+    ```
 Display the number of lines in each `csv` file.
 
+To display the number of lines in each 'csv' file
+
+  ```{bash}
+    for datafile in /home/203bdata/mimic-iii/*.csv
+      do
+        wc -l $datafile
+      done
+  ```
+      
+
+
 4. Display the first few lines of `ADMISSIONS.csv`. How many rows are in this data file? How many unique patients (identified by `SUBJECT_ID`) are in this data file? What are the possible values taken by each of the variable `INSURANCE`, `LANGUAGE`, `RELIGION`, `MARITAL_STATUS`, and `ETHNICITY`? How many (unique) patients are Hispanic? (Hint: combine Linux comamnds `head`, `tail`, `awk`, `uniq`, `wc`, `sort` and so on using pipe.)
+
+**Solution:** Let's display the first 10 lines of `ADMISSIONS.csv`
+```{bash}
+head /home/203bdata/mimic-iii/ADMISSIONS.csv
+```
 
 ## Q3. More fun with shell
 

@@ -430,10 +430,6 @@ summary {
   do
     ls $datafile
   done</code></pre>
-<pre class="bash"><code>for datafile in /home/203bdata/mimic-iii/*.csv
-  do
-    ls $datafile
-  done</code></pre>
 <pre><code>## /home/203bdata/mimic-iii/ADMISSIONS.csv
 ## /home/203bdata/mimic-iii/CALLOUT.csv
 ## /home/203bdata/mimic-iii/CAREGIVERS.csv
@@ -459,10 +455,10 @@ summary {
 ## /home/203bdata/mimic-iii/PROCEDUREEVENTS_MV.csv
 ## /home/203bdata/mimic-iii/PROCEDURES_ICD.csv
 ## /home/203bdata/mimic-iii/SERVICES.csv
-## /home/203bdata/mimic-iii/TRANSFERS.csv</code></pre>
-<p>Display the number of lines in each <code>csv</code> file.</p></li>
+## /home/203bdata/mimic-iii/TRANSFERS.csv</code></pre></li>
 </ol>
-<p>To display the number of lines in each ‘csv’ file</p>
+<p>Display the number of lines in each <code>csv</code> file.</p>
+<p><strong>Solution:</strong>To display the number of lines in each ‘csv’ file</p>
 <pre class="bash"><code>  for datafile in /home/203bdata/mimic-iii/*.csv
     do
       wc -l $datafile

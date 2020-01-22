@@ -42,31 +42,22 @@ Please, do **not** put these data files into Git; they are big. Also do **not** 
     Use Bash commands to answer following questions.
 
 3. What's the output of following bash script?
-    ```{bash, eval=FALSE}
+    ```{bash, eval=TRUE}
     for datafile in /home/203bdata/mimic-iii/*.csv
       do
         ls $datafile
       done
     ```
-    
-    ```{bash}
-    for datafile in /home/203bdata/mimic-iii/*.csv
-      do
-        ls $datafile
-      done
-    ```
+
 Display the number of lines in each `csv` file.
 
-To display the number of lines in each 'csv' file
-
+**Solution:**To display the number of lines in each 'csv' file
   ```{bash}
     for datafile in /home/203bdata/mimic-iii/*.csv
       do
         wc -l $datafile
       done
   ```
-      
-
 
 4. Display the first few lines of `ADMISSIONS.csv`. How many rows are in this data file? How many unique patients (identified by `SUBJECT_ID`) are in this data file? What are the possible values taken by each of the variable `INSURANCE`, `LANGUAGE`, `RELIGION`, `MARITAL_STATUS`, and `ETHNICITY`? How many (unique) patients are Hispanic? (Hint: combine Linux comamnds `head`, `tail`, `awk`, `uniq`, `wc`, `sort` and so on using pipe.)
 
@@ -84,11 +75,11 @@ head /home/203bdata/mimic-iii/ADMISSIONS.csv
 Do **not** put this text file `pride_and_prejudice.txt` in Git. Using a `for` loop, how would you tabulate the number of times each of the four characters is mentioned?
 
 0. What's the difference between the following two commands?
-    ```{bash eval=FALSE}
+    ```{bash eval=TRUE}
     echo 'hello, world' > test1.txt
     ```
     and
-    ```{bash eval=FALSE}
+    ```{bash eval=TRUE}
     echo 'hello, world' >> test2.txt
     ```
 

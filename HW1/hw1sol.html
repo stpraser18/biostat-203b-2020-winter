@@ -504,6 +504,8 @@ summary {
 ## 27,27,134931,2191-11-30 22:16:00,2191-12-03 14:45:00,,&quot;NEWBORN&quot;,&quot;PHYS REFERRAL/NORMAL DELI&quot;,&quot;HOME&quot;,&quot;Private&quot;,,&quot;CATHOLIC&quot;,,&quot;WHITE&quot;,,,&quot;NEWBORN&quot;,0,1
 ## 28,28,162569,2177-09-01 07:15:00,2177-09-06 16:00:00,,&quot;ELECTIVE&quot;,&quot;PHYS REFERRAL/NORMAL DELI&quot;,&quot;HOME HEALTH CARE&quot;,&quot;Medicare&quot;,,&quot;CATHOLIC&quot;,&quot;MARRIED&quot;,&quot;WHITE&quot;,,,&quot;CORONARY ARTERY DISEASE\CORONARY ARTERY BYPASS GRAFT/SDA&quot;,0,1
 ## 29,30,104557,2172-10-14 14:17:00,2172-10-19 14:37:00,,&quot;URGENT&quot;,&quot;TRANSFER FROM HOSP/EXTRAM&quot;,&quot;HOME HEALTH CARE&quot;,&quot;Medicare&quot;,,&quot;CATHOLIC&quot;,&quot;MARRIED&quot;,&quot;UNKNOWN/NOT SPECIFIED&quot;,,,&quot;UNSTABLE ANGINA\CATH&quot;,0,1</code></pre>
+<pre class="bash"><code>awk 'END { print NR }' /home/203bdata/mimic-iii/ADMISSIONS.csv</code></pre>
+<pre><code>## 58977</code></pre>
 </div>
 <div id="q3.-more-fun-with-shell" class="section level2">
 <h2>Q3. More fun with shell</h2>
@@ -515,16 +517,18 @@ summary {
 <pre class="bash"><code>echo 'hello, world' &gt; test1.txt</code></pre>
 <p>and</p>
 <pre class="bash"><code>echo 'hello, world' &gt;&gt; test2.txt</code></pre>
-<p><strong>Solution:</strong> The echo command displays the line of text, creating the phrase onto a text file.There is no difference between the two commands, except &gt;&gt; will append the phrase to the text file, the &gt; replaces the text file with the phrase.</p></li>
+<p><strong>Solution:</strong> The echo command displays the line of text, creating the phrase onto a text file.There is no difference between the two commands since both text files contained the phrase “hello, world”, except &gt;&gt; will append the phrase to the text file, the &gt; replaces the text file with the phrase.</p></li>
 <li><p>Using your favorite text editor (e.g., <code>vi</code>), type the following and save the file as <code>middle.sh</code>:</p>
 <pre class="bash"><code>#!/bin/sh
 # Select lines from the middle of a file.
 # Usage: bash middle.sh filename end_line num_lines
-head -n &quot;$2&quot; &quot;$1&quot; | tail -n &quot;$3&quot;</code></pre>
-<p>Using <code>chmod</code> make the file executable by the owner, and run</p>
-<pre class="bash"><code>./middle.sh pride_and_prejudice.txt 20 5</code></pre>
-<p>Explain the output. Explain the meaning of <code>&quot;$1&quot;</code>, <code>&quot;$2&quot;</code>, and <code>&quot;$3&quot;</code> in this shell script. Why do we need the first line of the shell script?</p></li>
+head -n &quot;$2&quot; &quot;$1&quot; | tail -n &quot;$3&quot;</code></pre></li>
 </ol>
+<p>Using <code>chmod</code> make the file executable by the owner, and run</p>
+<pre><code>```bash
+./middle.sh pride_and_prejudice.txt 20 5
+```</code></pre>
+<p>Explain the output. Explain the meaning of <code>&quot;$1&quot;</code>, <code>&quot;$2&quot;</code>, and <code>&quot;$3&quot;</code> in this shell script. Why do we need the first line of the shell script?</p>
 </div>
 <div id="q4.-r-batch-run" class="section level2">
 <h2>Q4. R Batch Run</h2>

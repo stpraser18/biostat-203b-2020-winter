@@ -65,6 +65,9 @@ Display the number of lines in each `csv` file.
 ```{bash}
 head /home/203bdata/mimic-iii/ADMISSIONS.csv
 ```
+```{bash, eval=TRUE}
+awk 'END { print NR }' /home/203bdata/mimic-iii/ADMISSIONS.csv
+```
 
 ## Q3. More fun with shell
 
@@ -82,7 +85,7 @@ Do **not** put this text file `pride_and_prejudice.txt` in Git. Using a `for` lo
     ```{bash eval=FALSE}
     echo 'hello, world' >> test2.txt
     ```
-**Solution:** The echo command displays the line of text, creating the phrase onto a text file.There is no difference between the two commands, except >> will append the phrase to the text file, the > replaces the text file with the phrase.
+**Solution:** The echo command displays the line of text, creating the phrase onto a text file.There is no difference between the two commands since both text files contained the phrase "hello, world", except >> will append the phrase to the text file, the > replaces the text file with the phrase.
 
 0. Using your favorite text editor (e.g., `vi`), type the following and save the file as `middle.sh`:
     ```{bash eval=FALSE}
@@ -91,6 +94,7 @@ Do **not** put this text file `pride_and_prejudice.txt` in Git. Using a `for` lo
     # Usage: bash middle.sh filename end_line num_lines
     head -n "$2" "$1" | tail -n "$3"
     ```
+
 Using `chmod` make the file executable by the owner, and run 
     ```{bash eval=FALSE}
     ./middle.sh pride_and_prejudice.txt 20 5

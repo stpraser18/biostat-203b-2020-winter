@@ -595,8 +595,20 @@ head -n &quot;$2&quot; &quot;$1&quot; | tail -n &quot;$3&quot;</code></pre></li>
 print(mseSampAvg / rep)
 print(msePrimeAvg / rep)</code></pre>
 <ol start="2" style="list-style-type: decimal">
-<li><p>Modify the <a href="https://ucla-biostat203b-2020winter.github.io/slides/02-linux/autoSim.R"><code>autoSim.R</code></a> script to run simulations with combinations of sample sizes <code>nVals = seq(100, 500, by=100)</code> and distributions <code>distTypes = c(&quot;gaussian&quot;, &quot;t1&quot;, &quot;t5&quot;)</code> and write output to appropriately named files. Use <code>rep = 50</code>, and <code>seed = 203</code>.</p></li>
-<li><p>Write an R script to collect simulation results from output files and print average MSEs in a table of format</p></li>
+<li>Modify the <a href="https://ucla-biostat203b-2020winter.github.io/slides/02-linux/autoSim.R"><code>autoSim.R</code></a> script to run simulations with combinations of sample sizes <code>nVals = seq(100, 500, by=100)</code> and distributions <code>distTypes = c(&quot;gaussian&quot;, &quot;t1&quot;, &quot;t5&quot;)</code> and write output to appropriately named files. Use <code>rep = 50</code>, and <code>seed = 203</code>.</li>
+</ol>
+<pre class="bash"><code>cat autoSim.R</code></pre>
+<pre><code>## # autoSim.R
+## 
+## nVals &lt;- seq(100, 1000, by=100)
+## for (n in nVals) {
+##   oFile &lt;- paste(&quot;n&quot;, n, &quot;.txt&quot;, sep=&quot;&quot;)
+##   sysCall &lt;- paste(&quot;nohup Rscript runSim.R n=&quot;, n, &quot; &gt; &quot;, oFile, sep=&quot;&quot;)
+##   system(sysCall, wait = FALSE)
+##   print(paste(&quot;sysCall=&quot;, sysCall, sep=&quot;&quot;))
+## }</code></pre>
+<ol start="3" style="list-style-type: decimal">
+<li>Write an R script to collect simulation results from output files and print average MSEs in a table of format</li>
 </ol>
 <table>
 <thead>

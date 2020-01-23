@@ -514,7 +514,85 @@ summary {
 ## &quot;Medicare&quot;
 ## &quot;Private&quot;
 ## &quot;Self Pay&quot;</code></pre>
-<p><strong>Solution:</strong></p>
+<p><strong>Solution:</strong> Languages spoken sorted</p>
+<pre class="bash"><code>awk -F, '{ print $11 }' /home/203bdata/mimic-iii/ADMISSIONS.csv | tail -n+2 | sort -u</code></pre>
+<pre><code>## 
+## &quot;ALBA&quot;
+## &quot;AMER&quot;
+## &quot;*AMH&quot;
+## &quot;*ARA&quot;
+## &quot;ARAB&quot;
+## &quot;*ARM&quot;
+## &quot;* BE&quot;
+## &quot;*BEN&quot;
+## &quot;BENG&quot;
+## &quot;*BOS&quot;
+## &quot;*BUL&quot;
+## &quot;*BUR&quot;
+## &quot;CAMB&quot;
+## &quot;*CAN&quot;
+## &quot;CANT&quot;
+## &quot;CAPE&quot;
+## &quot;*CDI&quot;
+## &quot;*CHI&quot;
+## &quot;*CRE&quot;
+## &quot;*DEA&quot;
+## &quot;*DUT&quot;
+## &quot;ENGL&quot;
+## &quot;ETHI&quot;
+## &quot;*FAR&quot;
+## &quot;*FIL&quot;
+## &quot;FREN&quot;
+## &quot;* FU&quot;
+## &quot;*FUL&quot;
+## &quot;GERM&quot;
+## &quot;GREE&quot;
+## &quot;*GUJ&quot;
+## &quot;HAIT&quot;
+## &quot;HIND&quot;
+## &quot;*HUN&quot;
+## &quot;*IBO&quot;
+## &quot;ITAL&quot;
+## &quot;JAPA&quot;
+## &quot;*KHM&quot;
+## &quot;KORE&quot;
+## &quot;LAOT&quot;
+## &quot;*LEB&quot;
+## &quot;*LIT&quot;
+## &quot;*MAN&quot;
+## &quot;MAND&quot;
+## &quot;*MOR&quot;
+## &quot;*NEP&quot;
+## &quot;*PER&quot;
+## &quot;PERS&quot;
+## &quot;*PHI&quot;
+## &quot;POLI&quot;
+## &quot;PORT&quot;
+## &quot;PTUN&quot;
+## &quot;*PUN&quot;
+## &quot;*ROM&quot;
+## &quot;*RUS&quot;
+## &quot;RUSS&quot;
+## &quot;SERB&quot;
+## &quot;**SH&quot;
+## &quot;SOMA&quot;
+## &quot;*SPA&quot;
+## &quot;SPAN&quot;
+## &quot;** T&quot;
+## &quot;TAGA&quot;
+## &quot;*TAM&quot;
+## &quot;*TEL&quot;
+## &quot;THAI&quot;
+## &quot;**TO&quot;
+## &quot;*TOI&quot;
+## &quot;*TOY&quot;
+## &quot;TURK&quot;
+## &quot;*URD&quot;
+## &quot;URDU&quot;
+## &quot;VIET&quot;
+## &quot;*YID&quot;
+## &quot;*YOR&quot;</code></pre>
+<p><strong>Solution:</strong> Values for religion</p>
 <pre class="bash"><code>awk -F, '{ print $12 }' /home/203bdata/mimic-iii/ADMISSIONS.csv | tail -n+2 | sort -u</code></pre>
 <pre><code>## 
 ## &quot;7TH DAY ADVENTIST&quot;
@@ -537,6 +615,59 @@ summary {
 ## &quot;ROMANIAN EAST. ORTH&quot;
 ## &quot;UNITARIAN-UNIVERSALIST&quot;
 ## &quot;UNOBTAINABLE&quot;</code></pre>
+<p><strong>Solution:</strong> Marital status sorted</p>
+<pre class="bash"><code>awk -F, '{ print $13 }' /home/203bdata/mimic-iii/ADMISSIONS.csv | tail -n+2 | sort -u</code></pre>
+<pre><code>## 
+## &quot;DIVORCED&quot;
+## &quot;LIFE PARTNER&quot;
+## &quot;MARRIED&quot;
+## &quot;SEPARATED&quot;
+## &quot;SINGLE&quot;
+## &quot;UNKNOWN (DEFAULT)&quot;
+## &quot;WIDOWED&quot;</code></pre>
+<p><strong>Solution:</strong> Ethnicity sorted</p>
+<pre class="bash"><code>awk -F, '{ print $14 }' /home/203bdata/mimic-iii/ADMISSIONS.csv | tail -n+2 | sort -u</code></pre>
+<pre><code>## &quot;AMERICAN INDIAN/ALASKA NATIVE&quot;
+## &quot;AMERICAN INDIAN/ALASKA NATIVE FEDERALLY RECOGNIZED TRIBE&quot;
+## &quot;ASIAN&quot;
+## &quot;ASIAN - ASIAN INDIAN&quot;
+## &quot;ASIAN - CAMBODIAN&quot;
+## &quot;ASIAN - CHINESE&quot;
+## &quot;ASIAN - FILIPINO&quot;
+## &quot;ASIAN - JAPANESE&quot;
+## &quot;ASIAN - KOREAN&quot;
+## &quot;ASIAN - OTHER&quot;
+## &quot;ASIAN - THAI&quot;
+## &quot;ASIAN - VIETNAMESE&quot;
+## &quot;BLACK/AFRICAN&quot;
+## &quot;BLACK/AFRICAN AMERICAN&quot;
+## &quot;BLACK/CAPE VERDEAN&quot;
+## &quot;BLACK/HAITIAN&quot;
+## &quot;CARIBBEAN ISLAND&quot;
+## &quot;HISPANIC/LATINO - CENTRAL AMERICAN (OTHER)&quot;
+## &quot;HISPANIC/LATINO - COLOMBIAN&quot;
+## &quot;HISPANIC/LATINO - CUBAN&quot;
+## &quot;HISPANIC/LATINO - DOMINICAN&quot;
+## &quot;HISPANIC/LATINO - GUATEMALAN&quot;
+## &quot;HISPANIC/LATINO - HONDURAN&quot;
+## &quot;HISPANIC/LATINO - MEXICAN&quot;
+## &quot;HISPANIC/LATINO - PUERTO RICAN&quot;
+## &quot;HISPANIC/LATINO - SALVADORAN&quot;
+## &quot;HISPANIC OR LATINO&quot;
+## &quot;MIDDLE EASTERN&quot;
+## &quot;MULTI RACE ETHNICITY&quot;
+## &quot;NATIVE HAWAIIAN OR OTHER PACIFIC ISLANDER&quot;
+## &quot;OTHER&quot;
+## &quot;PATIENT DECLINED TO ANSWER&quot;
+## &quot;PORTUGUESE&quot;
+## &quot;SOUTH AMERICAN&quot;
+## &quot;UNABLE TO OBTAIN&quot;
+## &quot;UNKNOWN/NOT SPECIFIED&quot;
+## &quot;WHITE&quot;
+## &quot;WHITE - BRAZILIAN&quot;
+## &quot;WHITE - EASTERN EUROPEAN&quot;
+## &quot;WHITE - OTHER EUROPEAN&quot;
+## &quot;WHITE - RUSSIAN&quot;</code></pre>
 <p><strong>Solution:</strong> There are 58,768 unique patients in the admissions data file.</p>
 <pre class="bash"><code>cut -d ' ' -f2 /home/203bdata/mimic-iii/ADMISSIONS.csv | sort -u | wc -l</code></pre>
 <pre><code>## 58768</code></pre>

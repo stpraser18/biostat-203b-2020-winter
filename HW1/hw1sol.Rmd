@@ -76,10 +76,26 @@ awk 'END { print NR }' /home/203bdata/mimic-iii/ADMISSIONS.csv
 awk -F, '{ print $10 }' /home/203bdata/mimic-iii/ADMISSIONS.csv | tail -n+2 | sort -u
 ```
 
-**Solution:**
+**Solution:** Languages spoken sorted
+```{bash, eval=TRUE}
+awk -F, '{ print $11 }' /home/203bdata/mimic-iii/ADMISSIONS.csv | tail -n+2 | sort -u
+```
+
+
+**Solution:** Values for religion
 
 ```{bash, eval=TRUE}
 awk -F, '{ print $12 }' /home/203bdata/mimic-iii/ADMISSIONS.csv | tail -n+2 | sort -u
+```
+
+**Solution:** Marital status sorted
+```{bash, eval=TRUE}
+awk -F, '{ print $13 }' /home/203bdata/mimic-iii/ADMISSIONS.csv | tail -n+2 | sort -u
+```
+
+**Solution:** Ethnicity sorted
+```{bash, eval=TRUE}
+awk -F, '{ print $14 }' /home/203bdata/mimic-iii/ADMISSIONS.csv | tail -n+2 | sort -u
 ```
 
 **Solution:** There are 58,768 unique patients in the admissions data file.

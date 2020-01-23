@@ -510,7 +510,9 @@ summary {
 <p><strong>Solution:</strong> There are 58,768 unique patients in the admissions data file.</p>
 <pre class="bash"><code>cut -d ' ' -f2 /home/203bdata/mimic-iii/ADMISSIONS.csv | sort -u | wc -l</code></pre>
 <pre><code>## 58768</code></pre>
-<p><strong>Solution:</strong> There are amount of Hispanics.</p>
+<p><strong>Solution:</strong> There are 2128 amount of Hispanics.</p>
+<pre class="bash"><code>ls | grep 'HISPANIC' /home/203bdata/mimic-iii/ADMISSIONS.csv | wc -l</code></pre>
+<pre><code>## 2128</code></pre>
 </div>
 <div id="q3.-more-fun-with-shell" class="section level2">
 <h2>Q3. More fun with shell</h2>

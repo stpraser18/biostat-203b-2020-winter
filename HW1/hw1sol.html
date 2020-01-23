@@ -507,6 +507,36 @@ summary {
 <p><strong>Solution:</strong> Number of lines for ADMISSIONS file is 58977</p>
 <pre class="bash"><code>awk 'END { print NR }' /home/203bdata/mimic-iii/ADMISSIONS.csv</code></pre>
 <pre><code>## 58977</code></pre>
+<p><strong>Solution:</strong> Sort unique values of insurance - government, medicaid, medicare, private, self pay.</p>
+<pre class="bash"><code>awk -F, '{ print $10 }' /home/203bdata/mimic-iii/ADMISSIONS.csv | tail -n+2 | sort -u</code></pre>
+<pre><code>## &quot;Government&quot;
+## &quot;Medicaid&quot;
+## &quot;Medicare&quot;
+## &quot;Private&quot;
+## &quot;Self Pay&quot;</code></pre>
+<p><strong>Solution:</strong></p>
+<pre class="bash"><code>awk -F, '{ print $12 }' /home/203bdata/mimic-iii/ADMISSIONS.csv | tail -n+2 | sort -u</code></pre>
+<pre><code>## 
+## &quot;7TH DAY ADVENTIST&quot;
+## &quot;BAPTIST&quot;
+## &quot;BUDDHIST&quot;
+## &quot;CATHOLIC&quot;
+## &quot;CHRISTIAN SCIENTIST&quot;
+## &quot;EPISCOPALIAN&quot;
+## &quot;GREEK ORTHODOX&quot;
+## &quot;HEBREW&quot;
+## &quot;HINDU&quot;
+## &quot;JEHOVAH'S WITNESS&quot;
+## &quot;JEWISH&quot;
+## &quot;LUTHERAN&quot;
+## &quot;METHODIST&quot;
+## &quot;MUSLIM&quot;
+## &quot;NOT SPECIFIED&quot;
+## &quot;OTHER&quot;
+## &quot;PROTESTANT QUAKER&quot;
+## &quot;ROMANIAN EAST. ORTH&quot;
+## &quot;UNITARIAN-UNIVERSALIST&quot;
+## &quot;UNOBTAINABLE&quot;</code></pre>
 <p><strong>Solution:</strong> There are 58,768 unique patients in the admissions data file.</p>
 <pre class="bash"><code>cut -d ' ' -f2 /home/203bdata/mimic-iii/ADMISSIONS.csv | sort -u | wc -l</code></pre>
 <pre><code>## 58768</code></pre>

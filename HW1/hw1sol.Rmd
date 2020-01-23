@@ -71,6 +71,17 @@ head /home/203bdata/mimic-iii/ADMISSIONS.csv
 awk 'END { print NR }' /home/203bdata/mimic-iii/ADMISSIONS.csv
 ```
 
+**Solution:** Sort unique values of insurance - government, medicaid, medicare, private, self pay.
+```{bash, eval=TRUE}
+awk -F, '{ print $10 }' /home/203bdata/mimic-iii/ADMISSIONS.csv | tail -n+2 | sort -u
+```
+
+**Solution:**
+
+```{bash, eval=TRUE}
+awk -F, '{ print $12 }' /home/203bdata/mimic-iii/ADMISSIONS.csv | tail -n+2 | sort -u
+```
+
 **Solution:** There are 58,768 unique patients in the admissions data file.
 ``` {bash, eval=TRUE}
 cut -d ' ' -f2 /home/203bdata/mimic-iii/ADMISSIONS.csv | sort -u | wc -l

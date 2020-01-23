@@ -504,11 +504,13 @@ summary {
 ## 27,27,134931,2191-11-30 22:16:00,2191-12-03 14:45:00,,&quot;NEWBORN&quot;,&quot;PHYS REFERRAL/NORMAL DELI&quot;,&quot;HOME&quot;,&quot;Private&quot;,,&quot;CATHOLIC&quot;,,&quot;WHITE&quot;,,,&quot;NEWBORN&quot;,0,1
 ## 28,28,162569,2177-09-01 07:15:00,2177-09-06 16:00:00,,&quot;ELECTIVE&quot;,&quot;PHYS REFERRAL/NORMAL DELI&quot;,&quot;HOME HEALTH CARE&quot;,&quot;Medicare&quot;,,&quot;CATHOLIC&quot;,&quot;MARRIED&quot;,&quot;WHITE&quot;,,,&quot;CORONARY ARTERY DISEASE\CORONARY ARTERY BYPASS GRAFT/SDA&quot;,0,1
 ## 29,30,104557,2172-10-14 14:17:00,2172-10-19 14:37:00,,&quot;URGENT&quot;,&quot;TRANSFER FROM HOSP/EXTRAM&quot;,&quot;HOME HEALTH CARE&quot;,&quot;Medicare&quot;,,&quot;CATHOLIC&quot;,&quot;MARRIED&quot;,&quot;UNKNOWN/NOT SPECIFIED&quot;,,,&quot;UNSTABLE ANGINA\CATH&quot;,0,1</code></pre>
-<p>**Solution:* Number of lines for ADMISSIONS file is 58977</p>
+<p><strong>Solution:</strong> Number of lines for ADMISSIONS file is 58977</p>
 <pre class="bash"><code>awk 'END { print NR }' /home/203bdata/mimic-iii/ADMISSIONS.csv</code></pre>
 <pre><code>## 58977</code></pre>
-<pre class="bash"><code>ls | grep 'SUBJECT_ID' /home/203bdata/mimic-iii/ADMISSIONS.csv</code></pre>
-<pre><code>## &quot;ROW_ID&quot;,&quot;SUBJECT_ID&quot;,&quot;HADM_ID&quot;,&quot;ADMITTIME&quot;,&quot;DISCHTIME&quot;,&quot;DEATHTIME&quot;,&quot;ADMISSION_TYPE&quot;,&quot;ADMISSION_LOCATION&quot;,&quot;DISCHARGE_LOCATION&quot;,&quot;INSURANCE&quot;,&quot;LANGUAGE&quot;,&quot;RELIGION&quot;,&quot;MARITAL_STATUS&quot;,&quot;ETHNICITY&quot;,&quot;EDREGTIME&quot;,&quot;EDOUTTIME&quot;,&quot;DIAGNOSIS&quot;,&quot;HOSPITAL_EXPIRE_FLAG&quot;,&quot;HAS_CHARTEVENTS_DATA&quot;</code></pre>
+<p><strong>Solution:</strong> There are 58,768 unique patients in the admissions data file.</p>
+<pre class="bash"><code>cut -d ' ' -f2 /home/203bdata/mimic-iii/ADMISSIONS.csv | sort -u | wc -l</code></pre>
+<pre><code>## 58768</code></pre>
+<p><strong>Solution:</strong> There are amount of Hispanics.</p>
 </div>
 <div id="q3.-more-fun-with-shell" class="section level2">
 <h2>Q3. More fun with shell</h2>
@@ -572,10 +574,24 @@ head -n &quot;$2&quot; &quot;$1&quot; | tail -n &quot;$3&quot;</code></pre></li>
 ## # estimate mean
 ## estMeanPrimes(x)</code></pre>
 <p>#set seed for random number generation set.seed(seed)</p>
-<p>for (r in 1:rep) { #stimulate data if (dist == “gaussian”) { x = rnorm(n) } else if (dist == “t1”) {</p>
-<p>}</p>
-<p>} }</p>
-<p>print (mseSampAvg / rep) print (msePrimeAvg / rep)</p>
+<pre class="bash"><code>for (r in 1:rep) {
+  #stimulate data
+  if (dist == &quot;gaussian&quot;) {
+    x = rnorm(n)
+  } else if (dist == &quot;t1&quot;) {
+    x = rt(n, df = 1)
+  } else if (dist == &quot;t5&quot;) {
+    x = rt(n, df = 5)
+  } else {
+      stop(&quot;unrecognized distribution&quot;)
+  }
+  # try two methods
+  mseSampAvg = mseSampAvg + mean(x)^2
+  msePrimeAvg = msemsePrimeAvg + estMeanPrimes(x)^2
+}
+
+print(mseSampAvg / rep)
+print(msePrimeAvg / rep)</code></pre>
 <ol start="2" style="list-style-type: decimal">
 <li><p>Modify the <a href="https://ucla-biostat203b-2020winter.github.io/slides/02-linux/autoSim.R"><code>autoSim.R</code></a> script to run simulations with combinations of sample sizes <code>nVals = seq(100, 500, by=100)</code> and distributions <code>distTypes = c(&quot;gaussian&quot;, &quot;t1&quot;, &quot;t5&quot;)</code> and write output to appropriately named files. Use <code>rep = 50</code>, and <code>seed = 203</code>.</p></li>
 <li><p>Write an R script to collect simulation results from output files and print average MSEs in a table of format</p></li>

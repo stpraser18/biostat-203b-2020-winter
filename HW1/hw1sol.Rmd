@@ -62,7 +62,7 @@ Display the number of lines in each `csv` file.
 4. Display the first few lines of `ADMISSIONS.csv`. How many rows are in this data file? How many unique patients (identified by `SUBJECT_ID`) are in this data file? What are the possible values taken by each of the variable `INSURANCE`, `LANGUAGE`, `RELIGION`, `MARITAL_STATUS`, and `ETHNICITY`? How many (unique) patients are Hispanic? (Hint: combine Linux comamnds `head`, `tail`, `awk`, `uniq`, `wc`, `sort` and so on using pipe.)
 
 **Solution:** Let's display the first 10 lines of `ADMISSIONS.csv`
-```{bash}
+```{bash, eval=TRUE}
 head /home/203bdata/mimic-iii/ADMISSIONS.csv
 ```
 **Solution:** Number of lines for ADMISSIONS file is 58977
@@ -71,9 +71,13 @@ head /home/203bdata/mimic-iii/ADMISSIONS.csv
 awk 'END { print NR }' /home/203bdata/mimic-iii/ADMISSIONS.csv
 ```
 
-```{bash, eval=TRUE}
-ls -al | grep '^SUBJECT_ID' /home/203bdata/mimic-iii/ADMISSIONS.csv
+**Solution:** There are 58,768 unique patients in the admissions data file.
+``` {bash, eval=TRUE}
+cut -d ' ' -f2 /home/203bdata/mimic-iii/ADMISSIONS.csv | sort -u | wc -l
 ```
+**Solution:** There are  amount of Hispanics.
+
+
 
 ## Q3. More fun with shell
 
@@ -125,19 +129,26 @@ cat runSim.R
 #set seed for random number generation
 set.seed(seed)
 
+```{bash, eval=FALSE}
 for (r in 1:rep) {
   #stimulate data
   if (dist == "gaussian") {
     x = rnorm(n)
   } else if (dist == "t1") {
-  
+    x = rt(n, df = 1)
+  } else if (dist == "t5") {
+    x = rt(n, df = 5)
+  } else {
+      stop("unrecognized distribution")
   }
-    
-  }
+  # try two methods
+  mseSampAvg = mseSampAvg + mean(x)^2
+  msePrimeAvg = msemsePrimeAvg + estMeanPrimes(x)^2
 }
 
-print (mseSampAvg / rep)
-print (msePrimeAvg / rep)
+print(mseSampAvg / rep)
+print(msePrimeAvg / rep)
+```
 
 2. Modify the [`autoSim.R`](https://ucla-biostat203b-2020winter.github.io/slides/02-linux/autoSim.R) script to run simulations with combinations of sample sizes `nVals = seq(100, 500, by=100)` and distributions `distTypes = c("gaussian", "t1", "t5")` and write output to appropriately named files. Use `rep = 50`, and `seed = 203`. 
 

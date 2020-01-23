@@ -78,7 +78,7 @@ cut -d ' ' -f2 /home/203bdata/mimic-iii/ADMISSIONS.csv | sort -u | wc -l
 **Solution:** There are 2128 amount of Hispanics.
 
 ```{bash, eval=TRUE}
-ls | grep 'HISPANIC' /home/203bdata/mimic-iii/ADMISSIONS.csv | wc -l
+grep 'HISPANIC' /home/203bdata/mimic-iii/ADMISSIONS.csv | sort -u | wc -l
 ```
 
 ## Q3. More fun with shell

@@ -678,20 +678,43 @@ summary {
 <div id="q3.-more-fun-with-shell" class="section level2">
 <h2>Q3. More fun with shell</h2>
 <ol style="list-style-type: decimal">
-<li><p>You and your friend just have finished reading <em>Pride and Prejudice</em> by Jane Austen. Among the four main characters in the book, Elizabeth, Jane, Lydia, and Darcy, your friend thinks that Darcy was the most mentioned. You, however, are certain it was Elizabeth. Obtain the full text of the novel from <a href="http://www.gutenberg.org/cache/epub/42671/pg42671.txt" class="uri">http://www.gutenberg.org/cache/epub/42671/pg42671.txt</a> and save to your local folder.</p>
-<pre class="bash"><code>curl http://www.gutenberg.org/cache/epub/42671/pg42671.txt &gt; pride_and_prejudice.txt</code></pre>
-<p>Do <strong>not</strong> put this text file <code>pride_and_prejudice.txt</code> in Git. Using a <code>for</code> loop, how would you tabulate the number of times each of the four characters is mentioned?</p></li>
+<li>You and your friend just have finished reading <em>Pride and Prejudice</em> by Jane Austen. Among the four main characters in the book, Elizabeth, Jane, Lydia, and Darcy, your friend thinks that Darcy was the most mentioned. You, however, are certain it was Elizabeth. Obtain the full text of the novel from <a href="http://www.gutenberg.org/cache/epub/42671/pg42671.txt" class="uri">http://www.gutenberg.org/cache/epub/42671/pg42671.txt</a> and save to your local folder.</li>
+</ol>
+<pre class="bash"><code>    curl http://www.gutenberg.org/cache/epub/42671/pg42671.txt &gt; pride_and_prejudice.txt</code></pre>
+<pre><code>##   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+##                                  Dload  Upload   Total   Spent    Left  Speed
+## 
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
+100  708k  100  708k    0     0   818k      0 --:--:-- --:--:-- --:--:--  818k</code></pre>
+<p>Do <strong>not</strong> put this text file <code>pride_and_prejudice.txt</code> in Git. Using a <code>for</code> loop, how would you tabulate the number of times each of the four characters is mentioned?</p>
+<pre class="bash"><code>grep 'Elizabeth' pride_and_prejudice.txt | wc -l</code></pre>
+<pre><code>## 633</code></pre>
+<pre class="bash"><code>grep 'Jane' pride_and_prejudice.txt | wc -l</code></pre>
+<pre><code>## 290</code></pre>
+<pre class="bash"><code>grep 'Lydia' /home/stpraser18/biostat-203b-2020-winter/HW1/pride_and_prejudice.txt | wc -l</code></pre>
+<pre><code>## 166</code></pre>
+<pre class="bash"><code>grep 'Darcy' /home/stpraser18/biostat-203b-2020-winter/HW1/pride_and_prejudice.txt | wc -l</code></pre>
+<pre><code>## 414</code></pre>
+<pre class="bash"><code>for name in Elizabeth Jane Lydia Darcy
+      do grep -o -i $name pride_and_prejudice.txt | wc -l
+      done</code></pre>
+<pre><code>## 634
+## 294
+## 171
+## 418</code></pre>
+<ol start="0" style="list-style-type: decimal">
 <li><p>What’s the difference between the following two commands?</p>
 <pre class="bash"><code>echo 'hello, world' &gt; test1.txt</code></pre>
 <p>and</p>
 <pre class="bash"><code>echo 'hello, world' &gt;&gt; test2.txt</code></pre>
 <p><strong>Solution:</strong> The echo command displays the line of text, creating the phrase onto a text file.There is no difference between the two commands since both text files contained the phrase “hello, world”, except &gt;&gt; will append the output from one command to the text file, the &gt; directs the output from one command to a file.</p></li>
-<li><p>Using your favorite text editor (e.g., <code>vi</code>), type the following and save the file as <code>middle.sh</code>:</p>
-<pre class="bash"><code>#!/bin/sh
-# Select lines from the middle of a file.
-# Usage: bash middle.sh filename end_line num_lines
-head -n &quot;$2&quot; &quot;$1&quot; | tail -n &quot;$3&quot;</code></pre></li>
+<li><p>Using your favorite text editor (e.g., <code>vi</code>), type the following and save the file as <code>middle.sh</code>:</p></li>
 </ol>
+<pre class="bash"><code>    #!/bin/sh
+    # Select lines from the middle of a file.
+    # Usage: bash middle.sh filename end_line num_lines
+    head -n &quot;$2&quot; &quot;$1&quot; | tail -n &quot;$3&quot;</code></pre>
 <p>Using <code>chmod</code> make the file executable by the owner, and run</p>
 <pre><code>```bash
 ./middle.sh pride_and_prejudice.txt 20 5
@@ -768,6 +791,33 @@ print(msePrimeAvg / rep)</code></pre>
 ##   system(sysCall, wait = FALSE)
 ##   print(paste(&quot;sysCall=&quot;, sysCall, sep=&quot;&quot;))
 ## }</code></pre>
+<pre class="bash"><code>nVals = seq(100, 500, by=100)
+rep = 50
+seed = 203
+distTypes = c(&quot;gaussian&quot;, &quot;t1&quot;, &quot;t5&quot;)
+for (n in nVals){
+for (dist in distTypes) {
+  #stimulate data
+  if (dist == &quot;gaussian&quot;) {
+    x = rnorm(n)
+  } else if (dist == &quot;t1&quot;) {
+    x = rt(n, df = 1)
+  } else if (dist == &quot;t5&quot;) {
+    x = rt(n, df = 5)
+  } else {
+      stop(&quot;unrecognized distribution&quot;)
+  }
+  # try two methods
+  mseSampAvg = mseSampAvg + mean(x)^2
+  msePrimeAvg = msemsePrimeAvg + estMeanPrimes(x)^2
+  print(mseSampAvg / rep)
+  print(msePrimeAvg / rep)
+} 
+  oFile &lt;- paste(&quot;n&quot;, n, &quot;.txt&quot;, sep=&quot;&quot;)
+  sysCall &lt;- paste(&quot;nohup Rscript runSim.R n=&quot;, n, &quot; &gt; &quot;, oFile, sep=&quot;&quot;)
+  system(sysCall, wait = FALSE)
+  print(paste(&quot;sysCall=&quot;, sysCall, sep=&quot;&quot;))
+}</code></pre>
 <ol start="3" style="list-style-type: decimal">
 <li>Write an R script to collect simulation results from output files and print average MSEs in a table of format</li>
 </ol>

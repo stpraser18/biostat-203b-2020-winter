@@ -122,11 +122,11 @@ grep 'HISPANIC' /home/203bdata/mimic-iii/ADMISSIONS.csv | sort -u | wc -l
 Do **not** put this text file `pride_and_prejudice.txt` in Git. Using a `for` loop, how would you tabulate the number of times each of the four characters is mentioned?
 
 ```{bash eval=TRUE}
-grep 'Elizabeth' /home/stpraser18/biostat-203b-2020-winter/HW1/pride_and_prejudice.txt | wc -l
+grep 'Elizabeth' pride_and_prejudice.txt | wc -l
 ```
 
 ```{bash eval=TRUE}
-grep 'Jane' /home/stpraser18/biostat-203b-2020-winter/HW1/pride_and_prejudice.txt | wc -l
+grep 'Jane' pride_and_prejudice.txt | wc -l
 ```
 
 ```{bash eval=TRUE}
@@ -138,19 +138,11 @@ grep 'Darcy' /home/stpraser18/biostat-203b-2020-winter/HW1/pride_and_prejudice.t
 ```
 
 ```{bash eval=TRUE}
-for name in /home/stpraser18/biostat-203b-2020-winter/HW1/pride_and_prejudice.txt
-      do
-        if [ "${name}" = "Elizabeth*" ] 
-          then countNameservers = $(grep 'Elizabeth' /home/stpraser18/biostat-203b-2020-winter/HW1/pride_and_prejudice.txt | wc -l)
-            echo "$countNameservers"
-          fi
+for name in Elizabeth Jane Lydia Darcy
+      do grep -o -i $name pride_and_prejudice.txt | wc -l
       done
 ```
 
-```{bash eval=TRUE}
-  pwd
-  head /home/stpraser18/biostat-203b-2020-winter/HW1/pride_and_prejudice.txt
-```
 
 0. What's the difference between the following two commands?
     ```{bash eval=FALSE}
@@ -163,12 +155,14 @@ for name in /home/stpraser18/biostat-203b-2020-winter/HW1/pride_and_prejudice.tx
 **Solution:** The echo command displays the line of text, creating the phrase onto a text file.There is no difference between the two commands since both text files contained the phrase "hello, world", except >> will append the output from one command to the text file, the > directs the output from one command to a file.
 
 0. Using your favorite text editor (e.g., `vi`), type the following and save the file as `middle.sh`:
-    ```{bash eval=FALSE}
+
+
+```{bash eval=FALSE}
     #!/bin/sh
     # Select lines from the middle of a file.
     # Usage: bash middle.sh filename end_line num_lines
     head -n "$2" "$1" | tail -n "$3"
-    ```
+```
 
 Using `chmod` make the file executable by the owner, and run 
     ```{bash eval=FALSE}
@@ -219,6 +213,36 @@ print(msePrimeAvg / rep)
 
 ```{bash, eval=TRUE}
 cat autoSim.R
+```
+
+```{bash eval=FALSE}
+nVals = seq(100, 500, by=100)
+rep = 50
+seed = 203
+distTypes = c("gaussian", "t1", "t5")
+for (n in nVals){
+for (dist in distTypes) {
+  #stimulate data
+  if (dist == "gaussian") {
+    x = rnorm(n)
+  } else if (dist == "t1") {
+    x = rt(n, df = 1)
+  } else if (dist == "t5") {
+    x = rt(n, df = 5)
+  } else {
+      stop("unrecognized distribution")
+  }
+  # try two methods
+  mseSampAvg = mseSampAvg + mean(x)^2
+  msePrimeAvg = msemsePrimeAvg + estMeanPrimes(x)^2
+  print(mseSampAvg / rep)
+  print(msePrimeAvg / rep)
+} 
+  oFile <- paste("n", n, ".txt", sep="")
+  sysCall <- paste("nohup Rscript runSim.R n=", n, " > ", oFile, sep="")
+  system(sysCall, wait = FALSE)
+  print(paste("sysCall=", sysCall, sep=""))
+}
 ```
 
 3. Write an R script to collect simulation results from output files and print average MSEs in a table of format

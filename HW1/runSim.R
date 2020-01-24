@@ -14,19 +14,18 @@ isPrime = function(n) {
   return (TRUE)
 }
 
-## estimate mean only using observation with prime indices
 estMeanPrimes = function (x) {
   n = length(x)
   ind = sapply(1:n, isPrime)
   return (mean(x[ind]))
 }
 
-# simulate data
-x = rnorm(n)
 
-# estimate mean
-estMeanPrimes(x)
+#set seed for random number generation
+set.seed(seed)
 
+mseSampAvg = 0
+msePrimeAvg = 0
 
 for (r in 1:rep) {
   #stimulate data
@@ -41,7 +40,7 @@ for (r in 1:rep) {
   }
   # try two methods
   mseSampAvg = mseSampAvg + mean(x)^2
-  msePrimeAvg = msemsePrimeAvg + estMeanPrimes(x)^2
+  msePrimeAvg = msePrimeAvg + estMeanPrimes(x)^2
 }
 
 print(mseSampAvg / rep)

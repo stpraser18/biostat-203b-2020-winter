@@ -122,25 +122,9 @@ grep 'HISPANIC' /home/203bdata/mimic-iii/ADMISSIONS.csv | sort -u | wc -l
 Do **not** put this text file `pride_and_prejudice.txt` in Git. Using a `for` loop, how would you tabulate the number of times each of the four characters is mentioned?
 
 ```{bash eval=TRUE}
-grep 'Elizabeth' pride_and_prejudice.txt | wc -l
-```
-
-```{bash eval=TRUE}
-grep 'Jane' pride_and_prejudice.txt | wc -l
-```
-
-```{bash eval=TRUE}
-grep 'Lydia' /home/stpraser18/biostat-203b-2020-winter/HW1/pride_and_prejudice.txt | wc -l
-```
-
-```{bash eval=TRUE}
-grep 'Darcy' /home/stpraser18/biostat-203b-2020-winter/HW1/pride_and_prejudice.txt | wc -l
-```
-
-```{bash eval=TRUE}
 for name in Elizabeth Jane Lydia Darcy
       do grep -o -i $name pride_and_prejudice.txt | wc -l
-      done
+     done
 ```
 
 
@@ -170,6 +154,11 @@ Using `chmod` make the file executable by the owner, and run
     ```
 Explain the output. Explain the meaning of `"$1"`, `"$2"`, and `"$3"` in this shell script. Why do we need the first line of the shell script?
 
+**Solution:** Author: Jane Austen
+
+Editor: R. W. (Robert William) Chapman
+
+
 ## Q4. R Batch Run
 
 In class we discussed using R to organize simulation studies. 
@@ -180,42 +169,23 @@ $$
 $$
 for both methods.
 
-**Solution**: This is my `runSim.R` code:
+**Solution:** This is my `runSim.R` code:
 ```{bash}
 cat runSim.R
 ```
 
-#set seed for random number generation
-set.seed(seed)
-
-```{bash, eval=FALSE}
-for (r in 1:rep) {
-  #stimulate data
-  if (dist == "gaussian") {
-    x = rnorm(n)
-  } else if (dist == "t1") {
-    x = rt(n, df = 1)
-  } else if (dist == "t5") {
-    x = rt(n, df = 5)
-  } else {
-      stop("unrecognized distribution")
-  }
-  # try two methods
-  mseSampAvg = mseSampAvg + mean(x)^2
-  msePrimeAvg = msemsePrimeAvg + estMeanPrimes(x)^2
-}
-
-print(mseSampAvg / rep)
-print(msePrimeAvg / rep)
-```
+**Solution:** The prime average is 0.039 and the sample average is 0.011.
 
 2. Modify the [`autoSim.R`](https://ucla-biostat203b-2020winter.github.io/slides/02-linux/autoSim.R) script to run simulations with combinations of sample sizes `nVals = seq(100, 500, by=100)` and distributions `distTypes = c("gaussian", "t1", "t5")` and write output to appropriately named files. Use `rep = 50`, and `seed = 203`. 
+
+```{bash}
+Rscript autoSim.R seed=203 reps=50
+```
 
 ```{bash, eval=TRUE}
 cat autoSim.R
 ```
 
-```{bash eval=FALSE}
 nVals = seq(100, 500, by=100)
 rep = 50
 seed = 203
@@ -243,7 +213,6 @@ for (dist in distTypes) {
   system(sysCall, wait = FALSE)
   print(paste("sysCall=", sysCall, sep=""))
 }
-```
 
 3. Write an R script to collect simulation results from output files and print average MSEs in a table of format
 

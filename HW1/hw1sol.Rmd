@@ -114,10 +114,43 @@ grep 'HISPANIC' /home/203bdata/mimic-iii/ADMISSIONS.csv | sort -u | wc -l
 ## Q3. More fun with shell
 
 1. You and your friend just have finished reading *Pride and Prejudice* by Jane Austen. Among the four main characters in the book, Elizabeth, Jane, Lydia, and Darcy, your friend thinks that Darcy was the most mentioned. You, however, are certain it was Elizabeth. Obtain the full text of the novel from <http://www.gutenberg.org/cache/epub/42671/pg42671.txt> and save to your local folder. 
-    ```{bash, eval=FALSE}
+
+```{bash, eval=TRUE}
     curl http://www.gutenberg.org/cache/epub/42671/pg42671.txt > pride_and_prejudice.txt
-    ```
+```
+ 
 Do **not** put this text file `pride_and_prejudice.txt` in Git. Using a `for` loop, how would you tabulate the number of times each of the four characters is mentioned?
+
+```{bash eval=TRUE}
+grep 'Elizabeth' /home/stpraser18/biostat-203b-2020-winter/HW1/pride_and_prejudice.txt | wc -l
+```
+
+```{bash eval=TRUE}
+grep 'Jane' /home/stpraser18/biostat-203b-2020-winter/HW1/pride_and_prejudice.txt | wc -l
+```
+
+```{bash eval=TRUE}
+grep 'Lydia' /home/stpraser18/biostat-203b-2020-winter/HW1/pride_and_prejudice.txt | wc -l
+```
+
+```{bash eval=TRUE}
+grep 'Darcy' /home/stpraser18/biostat-203b-2020-winter/HW1/pride_and_prejudice.txt | wc -l
+```
+
+```{bash eval=TRUE}
+for name in /home/stpraser18/biostat-203b-2020-winter/HW1/pride_and_prejudice.txt
+      do
+        if [ "${name}" = "Elizabeth*" ] 
+          then countNameservers = $(grep 'Elizabeth' /home/stpraser18/biostat-203b-2020-winter/HW1/pride_and_prejudice.txt | wc -l)
+            echo "$countNameservers"
+          fi
+      done
+```
+
+```{bash eval=TRUE}
+  pwd
+  head /home/stpraser18/biostat-203b-2020-winter/HW1/pride_and_prejudice.txt
+```
 
 0. What's the difference between the following two commands?
     ```{bash eval=FALSE}

@@ -154,7 +154,7 @@ Using `chmod` make the file executable by the owner, and run
 ```
 Explain the output. Explain the meaning of `"$1"`, `"$2"`, and `"$3"` in this shell script. Why do we need the first line of the shell script?
 
-**Solution:** The last command will print five lines. The head -n is reading the beginning lines two lines, which is a blank and then author. The tail reads the last three lines from the bottom.The first line of the shell script is necessary to ensure that the "sh" as the parent to execute any further commands.
+**Solution:** The last command will print five lines. The head -n is reading the beginning lines two lines indicated by $1 and $2, which is a blank row and then author. The $3 tail reads the last three lines from the bottom.The first line of the shell script is necessary to ensure that the "sh" as the parent to execute any further commands.
 
 **Output:** Author: Jane Austen
 

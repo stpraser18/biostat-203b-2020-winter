@@ -149,12 +149,14 @@ for name in Elizabeth Jane Lydia Darcy
 ```
 
 Using `chmod` make the file executable by the owner, and run 
-    ```{bash eval=FALSE}
+```{bash eval=TRUE}
     ./middle.sh pride_and_prejudice.txt 20 5
-    ```
+```
 Explain the output. Explain the meaning of `"$1"`, `"$2"`, and `"$3"` in this shell script. Why do we need the first line of the shell script?
 
-**Solution:** Author: Jane Austen
+**Solution:** The last command will print five lines. The head -n is reading the beginning lines two lines, which is a blank and then author. The tail reads the last three lines from the bottom.
+
+**Output:** Author: Jane Austen
 
 Editor: R. W. (Robert William) Chapman
 

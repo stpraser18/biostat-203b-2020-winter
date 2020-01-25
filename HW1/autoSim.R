@@ -9,12 +9,11 @@ distTypes = c("gaussian", "t1", "t5")
 
 for (n in nVals) {
   for (d in distTypes) {
-    oFile <- paste("n", n, d, ".txt", sep="")
+    oFile <- paste("n_", n, "_", d, ".txt", sep="")
     arg = paste("n=", n, " dist=", shQuote(shQuote(d)),
               " seed=", seed, " rep=", rep, sep="")
   sysCall = paste("nohup Rscript runSim.R ", arg, " > ", oFile, sep="")
-  sysCall <- paste("nohup Rscript runSim.R", arg, " > ", oFile, sep="")
-  system(sysCall, wait = FALSE)
+  system(sysCall)
   print(paste("sysCall=", sysCall, sep=""))
   }
 }

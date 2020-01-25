@@ -154,7 +154,7 @@ Using `chmod` make the file executable by the owner, and run
 ```
 Explain the output. Explain the meaning of `"$1"`, `"$2"`, and `"$3"` in this shell script. Why do we need the first line of the shell script?
 
-**Solution:** The last command will print five lines. The head -n is reading the beginning lines two lines, which is a blank and then author. The tail reads the last three lines from the bottom.
+**Solution:** The last command will print five lines. The head -n is reading the beginning lines two lines, which is a blank and then author. The tail reads the last three lines from the bottom.The first line of the shell script is necessary to ensure that the "sh" as the parent to execute any further commands.
 
 **Output:** Author: Jane Austen
 
@@ -172,15 +172,19 @@ $$
 for both methods.
 
 **Solution:** This is my `runSim.R` code:
+
 ```{bash}
 cat runSim.R
+```
+```{bash eval=TRUE}
+Rscript runSim.R n=100 dist=\"gaussian\" seed=203 reps=50
 ```
 
 **Solution:** The prime average is 0.039 and the sample average is 0.011.
 
 2. Modify the [`autoSim.R`](https://ucla-biostat203b-2020winter.github.io/slides/02-linux/autoSim.R) script to run simulations with combinations of sample sizes `nVals = seq(100, 500, by=100)` and distributions `distTypes = c("gaussian", "t1", "t5")` and write output to appropriately named files. Use `rep = 50`, and `seed = 203`. 
 
-```{bash}
+```{bash eval=TRUE}
 Rscript autoSim.R seed=203 reps=50
 ```
 

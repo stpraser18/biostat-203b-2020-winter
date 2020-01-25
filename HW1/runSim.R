@@ -14,12 +14,14 @@ isPrime = function(n) {
   return (TRUE)
 }
 
+# simulate data
+x = rnorm(n)
+
 estMeanPrimes = function (x) {
   n = length(x)
   ind = sapply(1:n, isPrime)
   return (mean(x[ind]))
 }
-
 
 #set seed for random number generation
 set.seed(seed)

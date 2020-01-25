@@ -176,49 +176,17 @@ for both methods.
 ```{bash}
 cat runSim.R
 ```
-```{bash eval=TRUE}
-Rscript runSim.R n=100 dist=\"gaussian\" seed=203 reps=50
-```
+
 
 **Solution:** The prime average is 0.039 and the sample average is 0.011.
 
 2. Modify the [`autoSim.R`](https://ucla-biostat203b-2020winter.github.io/slides/02-linux/autoSim.R) script to run simulations with combinations of sample sizes `nVals = seq(100, 500, by=100)` and distributions `distTypes = c("gaussian", "t1", "t5")` and write output to appropriately named files. Use `rep = 50`, and `seed = 203`. 
 
-```{bash eval=TRUE}
-Rscript autoSim.R seed=203 reps=50
-```
-
 ```{bash, eval=TRUE}
 cat autoSim.R
 ```
 
-nVals = seq(100, 500, by=100)
-rep = 50
-seed = 203
-distTypes = c("gaussian", "t1", "t5")
-for (n in nVals){
-for (dist in distTypes) {
-  #stimulate data
-  if (dist == "gaussian") {
-    x = rnorm(n)
-  } else if (dist == "t1") {
-    x = rt(n, df = 1)
-  } else if (dist == "t5") {
-    x = rt(n, df = 5)
-  } else {
-      stop("unrecognized distribution")
-  }
-  # try two methods
-  mseSampAvg = mseSampAvg + mean(x)^2
-  msePrimeAvg = msemsePrimeAvg + estMeanPrimes(x)^2
-  print(mseSampAvg / rep)
-  print(msePrimeAvg / rep)
-} 
-  oFile <- paste("n", n, ".txt", sep="")
-  sysCall <- paste("nohup Rscript runSim.R n=", n, " > ", oFile, sep="")
-  system(sysCall, wait = FALSE)
-  print(paste("sysCall=", sysCall, sep=""))
-}
+**Solution:** All the files were created according to sample size and distribution.
 
 3. Write an R script to collect simulation results from output files and print average MSEs in a table of format
 
@@ -234,3 +202,8 @@ for (dist in distTypes) {
 | 400 | SampAvg  |       |       |          |
 | 500 | PrimeAvg |       |       |          |
 | 500 | SampAvg  |       |       |          |
+
+```{bash}
+cat MSEtable.R
+```
+

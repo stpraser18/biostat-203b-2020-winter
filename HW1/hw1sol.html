@@ -685,15 +685,8 @@ summary {
 ##                                  Dload  Upload   Total   Spent    Left  Speed
 ## 
   0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
-  0     0    0     0    0     0      0      0 --:--:--  0:00:01 --:--:--     0
-  0     0    0     0    0     0      0      0 --:--:--  0:00:02 --:--:--     0
-  0     0    0     0    0     0      0      0 --:--:--  0:00:03 --:--:--     0
-  0     0    0     0    0     0      0      0 --:--:--  0:00:04 --:--:--     0
-  0     0    0     0    0     0      0      0 --:--:--  0:00:05 --:--:--     0
-  0     0    0     0    0     0      0      0 --:--:--  0:00:06 --:--:--     0
-  0     0    0     0    0     0      0      0 --:--:--  0:00:07 --:--:--     0
- 79  708k   79  566k    0     0  73132      0  0:00:09  0:00:07  0:00:02  122k
-100  708k  100  708k    0     0  91050      0  0:00:07  0:00:07 --:--:--  194k</code></pre>
+ 18  708k   18  129k    0     0   171k      0  0:00:04 --:--:--  0:00:04  171k
+100  708k  100  708k    0     0   563k      0  0:00:01  0:00:01 --:--:--  564k</code></pre>
 <p>Do <strong>not</strong> put this text file <code>pride_and_prejudice.txt</code> in Git. Using a <code>for</code> loop, how would you tabulate the number of times each of the four characters is mentioned?</p>
 <pre class="bash"><code>for name in Elizabeth Jane Lydia Darcy
       do grep -o -i $name pride_and_prejudice.txt | wc -l
@@ -715,11 +708,15 @@ summary {
     # Usage: bash middle.sh filename end_line num_lines
     head -n &quot;$2&quot; &quot;$1&quot; | tail -n &quot;$3&quot;</code></pre>
 <p>Using <code>chmod</code> make the file executable by the owner, and run</p>
-<pre><code>```bash
-./middle.sh pride_and_prejudice.txt 20 5
-```</code></pre>
+<pre class="bash"><code>    ./middle.sh pride_and_prejudice.txt 20 5</code></pre>
+<pre><code>## 
+## Author: Jane Austen
+## 
+## Editor: R. W. (Robert William) Chapman
+## </code></pre>
 <p>Explain the output. Explain the meaning of <code>&quot;$1&quot;</code>, <code>&quot;$2&quot;</code>, and <code>&quot;$3&quot;</code> in this shell script. Why do we need the first line of the shell script?</p>
-<p><strong>Solution:</strong> Author: Jane Austen</p>
+<p><strong>Solution:</strong> The last command will print five lines. The head -n is reading the beginning lines two lines, which is a blank and then author. The tail reads the last three lines from the bottom.The first line of the shell script is necessary to ensure that the “sh” as the parent to execute any further commands.</p>
+<p><strong>Output:</strong> Author: Jane Austen</p>
 <p>Editor: R. W. (Robert William) Chapman</p>
 </div>
 <div id="q4.-r-batch-run" class="section level2">
@@ -747,6 +744,9 @@ summary {
 ##   }
 ##   return (TRUE)
 ## }
+## 
+## # simulate data
+## x = rnorm(n)
 ## 
 ## estMeanPrimes = function (x) {
 ##   n = length(x)
@@ -785,14 +785,23 @@ summary {
 <pre class="bash"><code>cat autoSim.R</code></pre>
 <pre><code>## # autoSim.R
 ## 
-## nVals &lt;- seq(100, 1000, by=100)
+## for (arg in commandArgs(TRUE)) {
+##   eval(parse(text=arg))
+## }
+## 
+## nVals &lt;- seq(100, 500, by=100)
+## distTypes = c(&quot;gaussian&quot;, &quot;t1&quot;, &quot;t5&quot;)
+## 
 ## for (n in nVals) {
-##   oFile &lt;- paste(&quot;n&quot;, n, &quot;.txt&quot;, sep=&quot;&quot;)
-##   sysCall &lt;- paste(&quot;nohup Rscript runSim.R n=&quot;, n, &quot; &gt; &quot;, oFile, sep=&quot;&quot;)
-##   system(sysCall, wait = FALSE)
+##   for (d in distTypes) {
+##     oFile &lt;- paste(&quot;n_&quot;, n, &quot;_&quot;, d, &quot;.txt&quot;, sep=&quot;&quot;)
+##     arg = paste(&quot;n=&quot;, n, &quot; dist=&quot;, shQuote(shQuote(d)),
+##               &quot; seed=&quot;, seed, &quot; rep=&quot;, rep, sep=&quot;&quot;)
+##   sysCall = paste(&quot;nohup Rscript runSim.R &quot;, arg, &quot; &gt; &quot;, oFile, sep=&quot;&quot;)
+##   system(sysCall)
 ##   print(paste(&quot;sysCall=&quot;, sysCall, sep=&quot;&quot;))
+##   }
 ## }</code></pre>
-<p>nVals = seq(100, 500, by=100) rep = 50 seed = 203 distTypes = c(“gaussian”, “t1”, “t5”) for (n in nVals){ for (dist in distTypes) { #stimulate data if (dist == “gaussian”) { x = rnorm(n) } else if (dist == “t1”) { x = rt(n, df = 1) } else if (dist == “t5”) { x = rt(n, df = 5) } else { stop(“unrecognized distribution”) } # try two methods mseSampAvg = mseSampAvg + mean(x)^2 msePrimeAvg = msemsePrimeAvg + estMeanPrimes(x)^2 print(mseSampAvg / rep) print(msePrimeAvg / rep) } oFile &lt;- paste(“n”, n, “.txt”, sep=&quot;“) sysCall &lt;- paste(”nohup Rscript runSim.R n=“, n,” &gt; “, oFile, sep=”“) system(sysCall, wait = FALSE) print(paste(”sysCall=“, sysCall, sep=”&quot;)) }</p>
 <ol start="3" style="list-style-type: decimal">
 <li>Write an R script to collect simulation results from output files and print average MSEs in a table of format</li>
 </ol>
@@ -879,6 +888,27 @@ summary {
 </tr>
 </tbody>
 </table>
+<pre class="bash"><code>cat MSEtable.R</code></pre>
+<pre><code>## #Separate files according to gaussian, t1, and t5
+## 
+## files_gaussian &lt;- c(&quot;n_100_gaussian.txt&quot;,  &quot;n_200_gaussian.txt&quot;, &quot;n_300_gaussian.txt&quot;, &quot;n_400_gaussian.txt&quot;, &quot;n_500_gaussian.txt&quot;)
+## 
+## files_t1 &lt;- c(&quot;n_100_t1.txt&quot;,  &quot;n_200_t1.txt&quot;, &quot;n_300_t1.txt&quot;, &quot;n_400_t1.txt&quot;,  &quot;n_500_t1.txt&quot;)
+## 
+## files_t5 &lt;- c(&quot;n_100_t5.txt&quot;,  &quot;n_200_t5.txt&quot;, &quot;n_300_t5.txt&quot;, &quot;n_400_t5.txt&quot;, &quot;n_500_t5.txt&quot;)
+## 
+## #Create variables for data frame
+## n &lt;- c(100,100,200,200,300,400)
+## Method &lt;- c('PrimeAvg', 'SampAvg')
+## Gaussian &lt;- c(files_gaussian)
+## t1 &lt;- c(files_t1)
+## t5 &lt;- c(files_t5)
+## 
+## # Join the variables to create a data frame
+## df &lt;- data.frame(n,Method,Gaussian,t1,t5)
+## 
+## #Print structure
+## str(df)</code></pre>
 </div>
 
 

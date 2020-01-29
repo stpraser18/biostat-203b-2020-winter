@@ -1,0 +1,66 @@
+#Extract from .txt output files
+
+# Put in actual path where the text files are saved
+library(data.table)
+
+#Create 3 different dataframes: 1) Gaussian 2) t5 3) t1
+
+#Gaussian
+files_gauss <- c("n100distgaussian.txt",  "n200distgaussian.txt",
+                 "n300distgaussian.txt", "n400distgaussian.txt",
+                 "n500distgaussian.txt")
+df_gauss <- rbindlist(sapply(files_gauss, fread, simplify = FALSE))
+colnames(df_gauss)[2] = "Gaussian"
+df_gauss_new = subset(df_gauss, select = -c(V1))
+
+
+#t5
+files_t5 <- c("n100distt5.txt", "n200distt5.txt",
+              "n300distt5.txt", "n400distt5.txt",
+              "n500distt5.txt")
+df_t5 <- rbindlist(sapply(files_t5, fread, simplify = FALSE))
+colnames(df_t5)[2] = "t5"
+df_t5_new = subset(df_t5, select = -c(V1))
+
+#t1
+files_t1 <- c("n100distt1.txt",  "n200distt1.txt",
+              "n300distt1.txt", "n400distt1.txt",
+              "n500distt1.txt")
+df_t1 <- rbindlist(sapply(files_t1, fread, simplify = FALSE))
+colnames(df_t1)[2] = "t1"
+df_t1_new = subset(df_t1, select = -c(V1))
+
+#Create the column of the Method
+rown = 1
+method_col <- data.frame(matrix(0, nrow = 10, ncol = 1))
+for(i in 1:10){
+  if((rown%%2) == 0){
+    method_col[rown,1] = "SampAvg"
+  } else {
+    method_col[rown,1] = "PrimeAvg"
+  }
+  rown = rown + 1
+}
+colnames(method_col)[1] = "Method"
+
+#Create Column of the n's
+n_row = 1
+n_mat <- data.frame(matrix(0, nrow = 10, ncol = 1))
+for(i in 1:10){
+  if(n_row == 1 | n_row == 2){
+    n_mat[n_row,1] = 100
+  } else if(n_row == 3 | n_row == 4) {
+    n_mat[n_row,1] = 200
+  } else if(n_row == 5 | n_row == 6){
+    n_mat[n_row,1] = 300
+  } else if(n_row == 7 | n_row == 8){
+    n_mat[n_row,1] = 400
+  } else{
+    n_mat[n_row,1] = 500
+  }
+  n_row = n_row + 1
+}
+colnames(n_mat)[1] = "n"
+
+#Combining into our final dataframe
+data.frame(n_mat, method_col, df_gauss_new, df_t5_new, df_t1_new)

@@ -32,6 +32,33 @@ Demographic information of the patients admitted into hospital is available in `
 
 Note it is possible that one patient (uniquely identified by the `SUBJECT_ID`) is admitted into hospital multiple times. When summarizing some demographic information, it makes sense to summarize based on only unique patients. 
 
+**Solution**
+
+```{r}
+library (tidyverse)
+library (lubridate)
+```
+
+##Import data
+````{bash}
+head /home/203bdata/mimic-iii/ADMISSIONS.csv
+```
+
+```{r}
+admissions <- read_csv("/home/203bdata/mimic-iii/ADMISSIONS.csv") 
+admissions
+admissions %>% print(width = Inf)
+```
+
+```{r}
+admissions %>%
+  mutate(adm_year = year(ADMITTIME)) %>%
+  ggplot() + 
+  geom_bar(mapping = aes(x = adm_year))
+```
+
+
+
 ## Q2
 
 Link the data in `ADMISSION.csv` and `PATIENTS.csv` (<https://mimic.physionet.org/mimictables/patients/>) and summarize following variables using appropriate graphs:  

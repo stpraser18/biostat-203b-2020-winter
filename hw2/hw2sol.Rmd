@@ -18,7 +18,7 @@ Demographic information of the patients admitted into hospital is available in `
   - admission year  
 - admission month  
 - admission week day  
-- admission hour  
+- admission hour
 - length of hospital stay  
 - admission type  
 - number of admissions per patient  
@@ -50,6 +50,7 @@ admissions
 admissions %>% print(width = Inf)
 ```
 
+#Admission year bar graph
 ```{r}
 admissions %>%
   mutate(adm_year = year(ADMITTIME)) %>%
@@ -57,6 +58,125 @@ admissions %>%
   geom_bar(mapping = aes(x = adm_year))
 ```
 
+#Admission month bar graph
+```{r}
+admissions %>%
+  mutate(adm_month = month(ADMITTIME)) %>%
+  ggplot() + 
+  geom_bar(mapping = aes(x = adm_month))
+```
+
+#Admission week day
+```{r}
+admissions %>%
+  mutate(wday = wday(ADMITTIME)) %>%
+  ggplot() + 
+  geom_bar(mapping = aes(x = wday))
+```
+#Admission hour
+```{r}
+admissions %>%
+  mutate(hour = hour(ADMITTIME)) %>%
+  ggplot() + 
+  geom_bar(mapping = aes(x = hour))
+```
+
+#Length of stay
+```{r}
+admissions %>%
+  mutate(los_days = as.numeric(as.duration(DISCHTIME - ADMITTIME) / 86400)) %>%
+  ggplot(aes(x = los_days)) + 
+  geom_histogram (bins = 100) + 
+  labs(x = "Length of Stay (days)")
+```
+
+#Admission Type
+```{r}
+admissions %>% 
+  group_by(ADMISSION_TYPE) %>%
+  summarize(count = n()) %>%
+  ggplot(aes(x = ADMISSION_TYPE, y = count)) +
+  geom_col()
+#%>%
+ # mutate(freq = N / sum(N),
+  #pct = round((freq*100), 0))
+```
+
+#Number of Admissions/Patient
+``` {bash}
+cut -d ',' -f2 /home/203bdata/mimic-iii/ADMISSIONS.csv | sort -u | wc -l
+```
+
+#Admission Location
+```{r}
+admissions %>% 
+  group_by(ADMISSION_LOCATION) %>%
+  summarize(count = n()) %>%
+  ggplot(aes(x = ADMISSION_LOCATION, y = count)) +
+  geom_col() +  
+  theme(axis.text.x = element_text(angle=90, hjust=1))
+```
+
+#Insurance
+```{r}
+admissions %>% 
+  group_by(INSURANCE) %>%
+  summarize(count = n()) %>%
+  ggplot(aes(x = INSURANCE, y = count)) +
+  geom_col() + 
+  theme(axis.text.x = element_text(angle=90, hjust=1))
+```
+
+#Language
+```{r}
+admissions %>% 
+  group_by(LANGUAGE) %>%
+  summarize(count = n()) %>%
+  ggplot(aes(x = LANGUAGE, fill = count)) +
+  geom_bar(width = 1) +
+  coord_polar("y")
+```
+
+#Religion
+```{r}
+admissions %>% 
+  group_by(RELIGION) %>%
+  summarize(count = n()) %>%
+  ggplot(aes(x = RELIGION, y = count)) +
+  geom_col() + 
+  theme(axis.text.x = element_text(angle=90, hjust=1))
+```
+
+#Marital Status
+```{r}
+admissions %>% 
+  group_by(MARITAL_STATUS) %>%
+  summarize(count = n()) %>%
+  ggplot(aes(x = MARITAL_STATUS, y = count)) +
+  geom_col() + 
+  theme(axis.text.x = element_text(angle=90, hjust=1))
+```
+
+#Ethnicity
+```{r}
+admissions %>% 
+  group_by(ETHNICITY) %>%
+  summarize(count = n()) %>%
+  ggplot(aes(x = ETHNICITY, y = count)) +
+  geom_col() + 
+  theme(axis.text.x = element_text(angle=90, hjust=1))
+```
+
+
+#Death
+#```{r}
+admissions %>% 
+  group_by(DEATHTIME) %>%
+  summarize(count = n(DEATHTIME)) %>%
+  ggplot(aes(x = DEATHTIME, y = count)) +
+  geom_bar() + 
+  theme(axis.text.x = element_text(angle=90, hjust=1))
+```
 
 
 ## Q2
@@ -64,7 +184,32 @@ admissions %>%
 Link the data in `ADMISSION.csv` and `PATIENTS.csv` (<https://mimic.physionet.org/mimictables/patients/>) and summarize following variables using appropriate graphs:  
 
 - gender  
-- age at admission 
+- age at admission
+
+```{r}
+patients <- read_csv("/home/203bdata/mimic-iii/PATIENTS.csv") 
+patients
+```
+
+```{r}
+admissions2 <- admissions %>% 
+  select (SUBJECT_ID)
+  admissions2
+```
+
+```{r}
+patients2 <- patients %>% 
+  select (SUBJECT_ID, GENDER)
+  patients2
+```
+
+```{r}
+left_join(admissions2, patients2) %>%
+group_by(GENDER) %>%
+  summarize(count = n()) %>%
+  ggplot() + 
+  geom_col(mapping = aes(x = GENDER, y = count))
+```
 
 ## Q3
 

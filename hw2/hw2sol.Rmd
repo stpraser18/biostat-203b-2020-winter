@@ -216,12 +216,21 @@ group_by(GENDER) %>%
   geom_col(mapping = aes(x = GENDER, y = count))
 ```
 
+#Extracted subject_id and admission time, also need to extract year
 ```{r}
 admissions3 <- admissions %>% 
-  select (SUBJECT_ID, ADMITTIME)
+  select (SUBJECT_ID, ADMITTIME) %>%
+  mutate(adm_year = year(ADMITTIME))
   admissions3
 ```
 
+#Extracted subject_id and date of birth, need to extract year
+```{r}
+patients3 <- patients %>% 
+  select (SUBJECT_ID, DOB) %>%
+  mutate(dateofbirth = year(DOB))
+  patients3
+```
 
 ## Q3
 

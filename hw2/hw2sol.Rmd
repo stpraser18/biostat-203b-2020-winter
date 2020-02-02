@@ -222,7 +222,7 @@ group_by(GENDER) %>%
 admissions3 <- admissions %>% 
   select (SUBJECT_ID, ADMITTIME) %>%
   mutate(adm_year = year(ADMITTIME)) %>%
-  select (-ADMITTIME)
+  select(SUBJECT_ID, -ADMITTIME, adm_year)
   admissions3
 ```
 
@@ -231,8 +231,14 @@ admissions3 <- admissions %>%
 patients3 <- patients %>% 
   select (SUBJECT_ID, DOB) %>%
   mutate(dateofbirth = year(DOB)) %>%
-  select (-DOB)
+  select (SUBJECT_ID, -DOB, dateofbirth)
   patients3
+```
+
+#Joined subject id, year of birth, and year of admission together, need to create new column for age
+```{r}
+left_join(admissions3, patients3) %>%
+  mutate (age_adm = adm_year - dateofbirth)
 ```
 
 ## Q3

@@ -725,7 +725,7 @@ group_by(GENDER) %&gt;%
 <pre class="r"><code>admissions3 &lt;- admissions %&gt;% 
   select (SUBJECT_ID, ADMITTIME) %&gt;%
   mutate(adm_year = year(ADMITTIME)) %&gt;%
-  select (-ADMITTIME)
+  select(SUBJECT_ID, -ADMITTIME, adm_year)
   admissions3</code></pre>
 <pre><code>## # A tibble: 58,976 x 2
 ##    SUBJECT_ID adm_year
@@ -745,7 +745,7 @@ group_by(GENDER) %&gt;%
 <pre class="r"><code>patients3 &lt;- patients %&gt;% 
   select (SUBJECT_ID, DOB) %&gt;%
   mutate(dateofbirth = year(DOB)) %&gt;%
-  select (-DOB)
+  select (SUBJECT_ID, -DOB, dateofbirth)
   patients3</code></pre>
 <pre><code>## # A tibble: 46,520 x 2
 ##    SUBJECT_ID dateofbirth
@@ -761,6 +761,24 @@ group_by(GENDER) %&gt;%
 ##  9        258        2124
 ## 10        260        2105
 ## # … with 46,510 more rows</code></pre>
+<p>#Joined subject id, year of birth, and year of admission together, need to create new column for age</p>
+<pre class="r"><code>left_join(admissions3, patients3) %&gt;%
+  mutate (age_adm = adm_year - dateofbirth)</code></pre>
+<pre><code>## Joining, by = &quot;SUBJECT_ID&quot;</code></pre>
+<pre><code>## # A tibble: 58,976 x 4
+##    SUBJECT_ID adm_year dateofbirth age_adm
+##         &lt;dbl&gt;    &lt;dbl&gt;       &lt;dbl&gt;   &lt;dbl&gt;
+##  1         22     2196        2131      65
+##  2         23     2153        2082      71
+##  3         23     2157        2082      75
+##  4         24     2139        2100      39
+##  5         25     2160        2101      59
+##  6         26     2126        2054      72
+##  7         27     2191        2191       0
+##  8         28     2177        2103      74
+##  9         30     2172        1872     300
+## 10         31     2108        2036      72
+## # … with 58,966 more rows</code></pre>
 </div>
 <div id="q3" class="section level2">
 <h2>Q3</h2>

@@ -37,6 +37,7 @@ Note it is possible that one patient (uniquely identified by the `SUBJECT_ID`) i
 ```{r}
 library (tidyverse)
 library (lubridate)
+library (dplyr)
 ```
 
 ##Import data
@@ -220,7 +221,8 @@ group_by(GENDER) %>%
 ```{r}
 admissions3 <- admissions %>% 
   select (SUBJECT_ID, ADMITTIME) %>%
-  mutate(adm_year = year(ADMITTIME))
+  mutate(adm_year = year(ADMITTIME)) %>%
+  select (-ADMITTIME)
   admissions3
 ```
 
@@ -228,7 +230,8 @@ admissions3 <- admissions %>%
 ```{r}
 patients3 <- patients %>% 
   select (SUBJECT_ID, DOB) %>%
-  mutate(dateofbirth = year(DOB))
+  mutate(dateofbirth = year(DOB)) %>%
+  select (-DOB)
   patients3
 ```
 

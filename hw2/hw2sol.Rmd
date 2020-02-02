@@ -191,18 +191,23 @@ patients <- read_csv("/home/203bdata/mimic-iii/PATIENTS.csv")
 patients
 ```
 
+#Extracted subject_id column from admissions 
 ```{r}
 admissions2 <- admissions %>% 
   select (SUBJECT_ID)
   admissions2
 ```
 
+
+#Extracted subject_id and gender from patients to merge together
 ```{r}
 patients2 <- patients %>% 
   select (SUBJECT_ID, GENDER)
   patients2
 ```
 
+
+#Merged the subject_id's together to determine their gender
 ```{r}
 left_join(admissions2, patients2) %>%
 group_by(GENDER) %>%
@@ -210,6 +215,13 @@ group_by(GENDER) %>%
   ggplot() + 
   geom_col(mapping = aes(x = GENDER, y = count))
 ```
+
+```{r}
+admissions3 <- admissions %>% 
+  select (SUBJECT_ID, ADMITTIME)
+  admissions3
+```
+
 
 ## Q3
 

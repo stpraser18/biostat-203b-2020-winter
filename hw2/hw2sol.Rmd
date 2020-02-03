@@ -238,7 +238,16 @@ patients3 <- patients %>%
 #Joined subject id, year of birth, and year of admission together, need to create new column for age
 ```{r}
 left_join(admissions3, patients3) %>%
-  mutate (age_adm = adm_year - dateofbirth)
+  mutate(age_adm = adm_year - dateofbirth)
+```
+
+#Create graph according to age of admission
+```{r}
+left_join(admissions3, patients3) %>%
+  group_by(age_adm) %>%
+  summarize(age_adm_count = n(age_adm)) %>%
+  ggplot(aes(x = age_adm, y = count)) +
+  geom_dotplot()
 ```
 
 ## Q3

@@ -548,6 +548,50 @@ summary {
 ##  9                    0                    1
 ## 10                    1                    1
 ## # … with 58,966 more rows</code></pre>
+<pre class="r"><code>admissionsunique &lt;- read_csv(&quot;/home/203bdata/mimic-iii/ADMISSIONS.csv&quot;)</code></pre>
+<pre><code>## Parsed with column specification:
+## cols(
+##   ROW_ID = col_double(),
+##   SUBJECT_ID = col_double(),
+##   HADM_ID = col_double(),
+##   ADMITTIME = col_datetime(format = &quot;&quot;),
+##   DISCHTIME = col_datetime(format = &quot;&quot;),
+##   DEATHTIME = col_datetime(format = &quot;&quot;),
+##   ADMISSION_TYPE = col_character(),
+##   ADMISSION_LOCATION = col_character(),
+##   DISCHARGE_LOCATION = col_character(),
+##   INSURANCE = col_character(),
+##   LANGUAGE = col_character(),
+##   RELIGION = col_character(),
+##   MARITAL_STATUS = col_character(),
+##   ETHNICITY = col_character(),
+##   EDREGTIME = col_datetime(format = &quot;&quot;),
+##   EDOUTTIME = col_datetime(format = &quot;&quot;),
+##   DIAGNOSIS = col_character(),
+##   HOSPITAL_EXPIRE_FLAG = col_double(),
+##   HAS_CHARTEVENTS_DATA = col_double()
+## )</code></pre>
+<pre class="r"><code>  unique(&quot;ROW_ID&quot;, &quot;SUBJECT_ID&quot;)</code></pre>
+<pre><code>## [1] &quot;ROW_ID&quot;</code></pre>
+<pre class="r"><code>  admissionsunique</code></pre>
+<pre><code>## # A tibble: 58,976 x 19
+##    ROW_ID SUBJECT_ID HADM_ID ADMITTIME           DISCHTIME          
+##     &lt;dbl&gt;      &lt;dbl&gt;   &lt;dbl&gt; &lt;dttm&gt;              &lt;dttm&gt;             
+##  1     21         22  165315 2196-04-09 12:26:00 2196-04-10 15:54:00
+##  2     22         23  152223 2153-09-03 07:15:00 2153-09-08 19:10:00
+##  3     23         23  124321 2157-10-18 19:34:00 2157-10-25 14:00:00
+##  4     24         24  161859 2139-06-06 16:14:00 2139-06-09 12:48:00
+##  5     25         25  129635 2160-11-02 02:06:00 2160-11-05 14:55:00
+##  6     26         26  197661 2126-05-06 15:16:00 2126-05-13 15:00:00
+##  7     27         27  134931 2191-11-30 22:16:00 2191-12-03 14:45:00
+##  8     28         28  162569 2177-09-01 07:15:00 2177-09-06 16:00:00
+##  9     29         30  104557 2172-10-14 14:17:00 2172-10-19 14:37:00
+## 10     30         31  128652 2108-08-22 23:27:00 2108-08-30 15:00:00
+## # … with 58,966 more rows, and 14 more variables: DEATHTIME &lt;dttm&gt;,
+## #   ADMISSION_TYPE &lt;chr&gt;, ADMISSION_LOCATION &lt;chr&gt;, DISCHARGE_LOCATION &lt;chr&gt;,
+## #   INSURANCE &lt;chr&gt;, LANGUAGE &lt;chr&gt;, RELIGION &lt;chr&gt;, MARITAL_STATUS &lt;chr&gt;,
+## #   ETHNICITY &lt;chr&gt;, EDREGTIME &lt;dttm&gt;, EDOUTTIME &lt;dttm&gt;, DIAGNOSIS &lt;chr&gt;,
+## #   HOSPITAL_EXPIRE_FLAG &lt;dbl&gt;, HAS_CHARTEVENTS_DATA &lt;dbl&gt;</code></pre>
 <p>#Admission year bar graph</p>
 <pre class="r"><code>admissions %&gt;%
   mutate(adm_year = year(ADMITTIME)) %&gt;%
@@ -761,24 +805,7 @@ group_by(GENDER) %&gt;%
 ##  9        258        2124
 ## 10        260        2105
 ## # … with 46,510 more rows</code></pre>
-<p>#Joined subject id, year of birth, and year of admission together, need to create new column for age</p>
-<pre class="r"><code>left_join(admissions3, patients3) %&gt;%
-  mutate(age_adm = adm_year - dateofbirth)</code></pre>
-<pre><code>## Joining, by = &quot;SUBJECT_ID&quot;</code></pre>
-<pre><code>## # A tibble: 58,976 x 4
-##    SUBJECT_ID adm_year dateofbirth age_adm
-##         &lt;dbl&gt;    &lt;dbl&gt;       &lt;dbl&gt;   &lt;dbl&gt;
-##  1         22     2196        2131      65
-##  2         23     2153        2082      71
-##  3         23     2157        2082      75
-##  4         24     2139        2100      39
-##  5         25     2160        2101      59
-##  6         26     2126        2054      72
-##  7         27     2191        2191       0
-##  8         28     2177        2103      74
-##  9         30     2172        1872     300
-## 10         31     2108        2036      72
-## # … with 58,966 more rows</code></pre>
+<p>#Joined subject id, year of birth, and year of admission together, need to create new column for age #<code>{r} left_join(admissions3, patients3) %&gt;%   mutate(age_adm = adm_year - dateofbirth)   ggplot() +   geom_dotplot(aes(x = age_adm, y = count))</code></p>
 <p>#Create graph according to age of admission #<code>{r} left_join(admissions3, patients3) %&gt;%   group_by(age_adm) %&gt;%   summarize(age_adm_count = n(age_adm)) %&gt;%   ggplot(aes(x = age_adm, y = count)) +   geom_dotplot()</code></p>
 </div>
 <div id="q3" class="section level2">
@@ -793,6 +820,59 @@ group_by(GENDER) %&gt;%
 </li>
 <li>age</li>
 </ul>
+<pre class="r"><code>library(lubridate)</code></pre>
+<p>#Load ICUSTAYS file</p>
+<pre class="r"><code>icustays &lt;- read_csv(&quot;/home/203bdata/mimic-iii/ICUSTAYS.csv&quot;)</code></pre>
+<pre><code>## Parsed with column specification:
+## cols(
+##   ROW_ID = col_double(),
+##   SUBJECT_ID = col_double(),
+##   HADM_ID = col_double(),
+##   ICUSTAY_ID = col_double(),
+##   DBSOURCE = col_character(),
+##   FIRST_CAREUNIT = col_character(),
+##   LAST_CAREUNIT = col_character(),
+##   FIRST_WARDID = col_double(),
+##   LAST_WARDID = col_double(),
+##   INTIME = col_datetime(format = &quot;&quot;),
+##   OUTTIME = col_datetime(format = &quot;&quot;),
+##   LOS = col_double()
+## )</code></pre>
+<pre class="r"><code>icustays</code></pre>
+<pre><code>## # A tibble: 61,532 x 12
+##    ROW_ID SUBJECT_ID HADM_ID ICUSTAY_ID DBSOURCE FIRST_CAREUNIT LAST_CAREUNIT
+##     &lt;dbl&gt;      &lt;dbl&gt;   &lt;dbl&gt;      &lt;dbl&gt; &lt;chr&gt;    &lt;chr&gt;          &lt;chr&gt;        
+##  1    365        268  110404     280836 carevue  MICU           MICU         
+##  2    366        269  106296     206613 carevue  MICU           MICU         
+##  3    367        270  188028     220345 carevue  CCU            CCU          
+##  4    368        271  173727     249196 carevue  MICU           SICU         
+##  5    369        272  164716     210407 carevue  CCU            CCU          
+##  6    370        273  158689     241507 carevue  MICU           MICU         
+##  7    371        274  130546     254851 carevue  MICU           MICU         
+##  8    372        275  129886     219649 carevue  CCU            CCU          
+##  9    373        276  135156     206327 carevue  CCU            CCU          
+## 10    374        277  171601     272866 carevue  NICU           NICU         
+## # … with 61,522 more rows, and 5 more variables: FIRST_WARDID &lt;dbl&gt;,
+## #   LAST_WARDID &lt;dbl&gt;, INTIME &lt;dttm&gt;, OUTTIME &lt;dttm&gt;, LOS &lt;dbl&gt;</code></pre>
+<p>#Length of ICUSTAYS</p>
+<pre class="r"><code>icustays %&gt;%
+  select(INTIME, OUTTIME) %&gt;%
+  mutate(icu_in_hour = hour(INTIME)) %&gt;%
+  mutate(icu_out_hour = hour(OUTTIME))</code></pre>
+<pre><code>## # A tibble: 61,532 x 4
+##    INTIME              OUTTIME             icu_in_hour icu_out_hour
+##    &lt;dttm&gt;              &lt;dttm&gt;                    &lt;int&gt;        &lt;int&gt;
+##  1 2198-02-14 23:27:38 2198-02-18 05:26:11          23            5
+##  2 2170-11-05 11:05:29 2170-11-08 17:46:57          11           17
+##  3 2128-06-24 15:05:20 2128-06-27 12:32:29          15           12
+##  4 2120-08-07 23:12:42 2120-08-10 00:39:04          23            0
+##  5 2186-12-25 21:08:04 2186-12-27 12:01:13          21           12
+##  6 2141-04-19 06:12:05 2141-04-20 17:52:11           6           17
+##  7 2114-06-28 22:28:44 2114-07-07 18:01:16          22           18
+##  8 2170-10-07 11:28:53 2170-10-14 14:38:07          11           14
+##  9 2147-11-20 09:02:23 2147-11-21 17:08:52           9           17
+## 10 2132-10-21 21:11:46 2132-10-22 14:44:48          21           14
+## # … with 61,522 more rows</code></pre>
 </div>
 <div id="q4" class="section level2">
 <h2>Q4</h2>

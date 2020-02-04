@@ -51,6 +51,14 @@ admissions
 admissions %>% print(width = Inf)
 ```
 
+```{r}
+admissionsunique <- read_csv("/home/203bdata/mimic-iii/ADMISSIONS.csv")
+  admissionsunique %>% 
+  summarise_all(n_distinct) %>%
+  select (SUBJECT_ID)
+```
+
+
 #Admission year bar graph
 ```{r}
 admissions %>%
@@ -236,13 +244,15 @@ patients3 <- patients %>%
 ```
 
 #Joined subject id, year of birth, and year of admission together, need to create new column for age
-```{r}
+#```{r}
 left_join(admissions3, patients3) %>%
   mutate(age_adm = adm_year - dateofbirth)
+  ggplot() +
+  geom_dotplot(aes(x = age_adm, y = count))
 ```
 
 #Create graph according to age of admission
-```{r}
+#```{r}
 left_join(admissions3, patients3) %>%
   group_by(age_adm) %>%
   summarize(age_adm_count = n(age_adm)) %>%
@@ -258,6 +268,26 @@ left_join(admissions3, patients3) %>%
 - first ICU unit  
 - gender  
 - age  
+
+```{r}
+library(lubridate)
+```
+
+#Load ICUSTAYS file
+```{r}
+icustays <- read_csv("/home/203bdata/mimic-iii/ICUSTAYS.csv")
+icustays
+```
+
+#Length of ICUSTAYS
+```{r}
+icustays %>%
+  select(INTIME, OUTTIME) %>%
+  mutate(icu_in_hour = hour(INTIME)) %>%
+  mutate(icu_out_hour = hour(OUTTIME))
+```
+
+
 
 ## Q4 
 

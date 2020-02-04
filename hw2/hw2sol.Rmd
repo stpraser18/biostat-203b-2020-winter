@@ -51,6 +51,7 @@ admissions
 admissions %>% print(width = Inf)
 ```
 
+#Found unique values
 ```{r}
 admissionsunique <- read_csv("/home/203bdata/mimic-iii/ADMISSIONS.csv")
   admissionsunique %>% 
@@ -58,6 +59,12 @@ admissionsunique <- read_csv("/home/203bdata/mimic-iii/ADMISSIONS.csv")
   select (SUBJECT_ID)
 ```
 
+#Listed all the unique values
+```{r}
+admissionsunique <- read_csv("/home/203bdata/mimic-iii/ADMISSIONS.csv")
+  admissionsunique %>% 
+  distinct(SUBJECT_ID)
+```
 
 #Admission year bar graph
 ```{r}
@@ -126,7 +133,18 @@ admissions %>%
   theme(axis.text.x = element_text(angle=90, hjust=1))
 ```
 
-#Insurance
+#Insurance sorted by unique values using distinct
+```{r}
+admissions %>% 
+  group_by(INSURANCE) %>%
+  distinct(SUBJECT_ID) %>%
+  summarize(count = n()) %>%
+  ggplot(aes(x = INSURANCE, y = count)) +
+  geom_col() + 
+  theme(axis.text.x = element_text(angle=90, hjust=1))
+```
+
+#Insurance without unique values
 ```{r}
 admissions %>% 
   group_by(INSURANCE) %>%

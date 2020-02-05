@@ -126,8 +126,9 @@ admissions %>%
 ```
 
 #Number of Admissions/Patient
-``` {bash}
-cut -d ',' -f2 /home/203bdata/mimic-iii/ADMISSIONS.csv | sort -u | wc -l
+
+``` {r}
+
 ```
 
 #Admission Location
@@ -142,6 +143,7 @@ admissions %>%
 ```
 
 #Insurance sorted by unique values using distinct
+**Solution:** The majority of the insurance coverage of the patients come from Medicare, with private being a close second. Very little of the coverage comes from self pay, government, and Medicaid.
 ```{r}
 admissions %>% 
   group_by(INSURANCE) %>%
@@ -163,17 +165,19 @@ admissions %>%
 ```
 
 #Language
+**Solution:** The majority of the admitted patients tend to speak English with a count of almost 25,000 patients. Additionally, NA was a little higher than English. Most of the languages listed did not have any, there were also very few Spanish speakers, Russian, Portuguese, and a few others. 
 ```{r}
 admissions %>% 
   group_by(LANGUAGE) %>%
   distinct(SUBJECT_ID) %>%
   summarize(count = n()) %>%
-  ggplot(aes(x = LANGUAGE, fill = count)) +
-  geom_bar(width = 1) +
-  coord_polar("y")
+  ggplot(aes(x = LANGUAGE, y = count)) +
+  geom_col() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
 
 #Religion
+**Solution:** The majority of the patients admitted are Catholic, I am a little surprised that Chrisitianity is not a specific option, even though there are options that are branched out from Christianity. This could be a reason patients might choose Catholic, since it is similar in some ways. The other major counts are not specified or unobtainable.
 ```{r}
 admissions %>% 
   group_by(RELIGION) %>%
@@ -185,6 +189,7 @@ admissions %>%
 ```
 
 #Marital Status
+**Solution:** Marital status is represented by a bar graph. The majority of the admitted patients are married
 ```{r}
 admissions %>% 
   group_by(MARITAL_STATUS) %>%
@@ -196,6 +201,7 @@ admissions %>%
 ```
 
 #Ethnicity
+**Solution:** The majority of the admitted patients are white, which is roughly 30,000. The second ethnicity to be admitted are African American and those that are unknown, about 5,000.
 ```{r}
 admissions %>% 
   group_by(ETHNICITY) %>%
@@ -208,13 +214,13 @@ admissions %>%
 
 
 #Death
-```{r}
+#```{r}
 admissions %>% 
   group_by(DEATHTIME) %>%
   distinct(SUBJECT_ID) %>%
   summarize(count = n()) %>%
-  ggplot(aes(x = DEATHTIME)) +
-  geom_histogram(binwidth = 5) 
+  ggplot(aes(x = count, y = DEATHTIME)) +
+  geom_histogram() 
 ```
 
 

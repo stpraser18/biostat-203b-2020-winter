@@ -128,7 +128,9 @@ admissions %>%
 #Number of Admissions/Patient
 
 ``` {r}
-
+admissions %>% 
+  group_by(SUBJECT_ID) %>%
+  summarize(count = n()) 
 ```
 
 #Admission Location
@@ -236,8 +238,8 @@ patients <- read_csv("/home/203bdata/mimic-iii/PATIENTS.csv")
 patients
 ```
 
-#Extracted subject_id column from admissions 
-#```{r}
+#Extracted unique subject_id column from admissions 
+```{r}
 admissions2 <- admissions %>% 
   select(SUBJECT_ID) %>%
   distinct(SUBJECT_ID)
@@ -246,7 +248,7 @@ admissions2 <- admissions %>%
 
 
 #Extracted subject_id and gender from patients to merge together
-#```{r}
+```{r}
 patients2 <- patients %>% 
   select (SUBJECT_ID, GENDER) %>%
   distinct(SUBJECT_ID, GENDER)
@@ -255,7 +257,8 @@ patients2 <- patients %>%
 
 
 #Merged the subject_id's together to determine their gender
-#```{r}
+**Solution:** There are more male admission patients compared to females. There are about 25,000 male patients, whereas females are about 21,000. 
+```{r}
 left_join(admissions2, patients2) %>%
 group_by(GENDER) %>%
   summarize(count = n()) %>%
@@ -264,39 +267,40 @@ group_by(GENDER) %>%
 ```
 
 #Extracted subject_id and admission time, also need to extract year
-#```{r}
+```{r}
 admissions3 <- admissions %>% 
   select (SUBJECT_ID, ADMITTIME) %>%
   mutate(adm_year = year(ADMITTIME)) %>%
-  select(SUBJECT_ID, -ADMITTIME, adm_year)
+  select(SUBJECT_ID, adm_year)
   admissions3
 ```
 
 #Extracted subject_id and date of birth, need to extract year
-#```{r}
+```{r}
 patients3 <- patients %>% 
   select (SUBJECT_ID, DOB) %>%
-  mutate(dateofbirth = year(DOB)) %>%
-  select (SUBJECT_ID, -DOB, dateofbirth)
+  mutate(yearofbirth = year(DOB)) %>%
+  select (SUBJECT_ID, yearofbirth)
   patients3
 ```
 
-#Joined subject id, year of birth, and year of admission together, need to create new column for age
-#```{r}
-left_join(admissions3, patients3) %>%
-  mutate(age_adm = adm_year - dateofbirth)
-  ggplot() +
-  geom_dotplot(aes(x = age_adm, y = count))
+#Joined subject id, year of birth, and year of admission together and created a new column
+```{r}
+joinage <- full_join(admissions3, patients3) %>%
+  mutate(age_adm = as.numeric(as.duration(adm_year - yearofbirth)))
+  joinage
+```
+ 
+#Created a graph based on the age admissions
+**Solution:** The data seems a little odd as there are many patients that are above 300, but there are about 8,000 patients that are 0 years which could be dealing with newborns. On average, there are about 1,000 patients that are about 60 to 90 over the span of the data.
+```{r}
+joinage %>%
+  group_by(age_adm) %>%
+  summarize(count = n()) %>%
+  ggplot(aes(x = age_adm, y = count)) +
+  geom_col()
 ```
 
-#Create graph according to age of admission
-#```{r}
-left_join(admissions3, patients3) %>%
-  group_by(age_adm) %>%
-  summarize(age_adm_count = n(age_adm)) %>%
-  ggplot(aes(x = age_adm, y = count)) +
-  geom_dotplot()
-```
 
 ## Q3
 

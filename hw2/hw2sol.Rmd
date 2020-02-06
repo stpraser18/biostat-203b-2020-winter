@@ -354,10 +354,37 @@ icustays2 <- icustays %>%
   icustays2
 ```
 
-#Joining subject to gender
+#Joining distinct subjects to gender
 ```{r}
-left_join(icustays2, patients2)
+joinicustay <- left_join(icustays2, patients2)
+joinicustay
 ```
+
+#Graph gender based on ICUSTAYS
+**Solution:** This graph actually looks fairly similar to the previous one that was the gender of the admitted patients. The distinct numbers are fairly close to one another, also. In the graph, there are more males admitted to the ICU compared to females. 
+```{r}
+joinicustay %>%
+  group_by(GENDER) %>%
+  summarize(count = n()) %>%
+  ggplot(aes(x = GENDER, y = count)) +
+  geom_col()
+```
+
+#Tried a different method to see if there was a difference between also adding the admissions and there was no difference.
+```{r}
+joinicustay2 <- left_join (joinicustay, admissions2)
+joinicustay2
+```
+
+```{r}
+joinicustay2 %>%
+  group_by(GENDER) %>%
+  summarize(count = n()) %>%
+  ggplot(aes(x = GENDER, y = count)) +
+  geom_col()
+```
+
+#Age of ICU patients
 
 
 ## Q4 

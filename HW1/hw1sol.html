@@ -669,8 +669,8 @@ summary {
 ## &quot;WHITE - OTHER EUROPEAN&quot;
 ## &quot;WHITE - RUSSIAN&quot;</code></pre>
 <p><strong>Solution:</strong> There are 58,768 unique patients in the admissions data file.</p>
-<pre class="bash"><code>cut -d ' ' -f2 /home/203bdata/mimic-iii/ADMISSIONS.csv | sort -u | wc -l</code></pre>
-<pre><code>## 58768</code></pre>
+<pre class="bash"><code>cut -d ',' -f2 /home/203bdata/mimic-iii/ADMISSIONS.csv | sort -u | wc -l</code></pre>
+<pre><code>## 46521</code></pre>
 <p><strong>Solution:</strong> There are 2128 amount of Hispanics.</p>
 <pre class="bash"><code>grep 'HISPANIC' /home/203bdata/mimic-iii/ADMISSIONS.csv | sort -u | wc -l</code></pre>
 <pre><code>## 2128</code></pre>
@@ -685,8 +685,8 @@ summary {
 ##                                  Dload  Upload   Total   Spent    Left  Speed
 ## 
   0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
-  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0
-100  708k  100  708k    0     0   525k      0  0:00:01  0:00:01 --:--:--  525k</code></pre>
+ 21  708k   21  153k    0     0   203k      0  0:00:03 --:--:--  0:00:03  204k
+100  708k  100  708k    0     0   665k      0  0:00:01  0:00:01 --:--:--  666k</code></pre>
 <p>Do <strong>not</strong> put this text file <code>pride_and_prejudice.txt</code> in Git. Using a <code>for</code> loop, how would you tabulate the number of times each of the four characters is mentioned?</p>
 <pre class="bash"><code>for name in Elizabeth Jane Lydia Darcy
       do grep -o -i $name pride_and_prejudice.txt | wc -l

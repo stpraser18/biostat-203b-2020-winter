@@ -311,10 +311,6 @@ joinage %>%
 - gender  
 - age  
 
-```{r}
-library(lubridate)
-```
-
 #Load ICUSTAYS file
 ```{r}
 icustays <- read_csv("/home/203bdata/mimic-iii/ICUSTAYS.csv")
@@ -322,11 +318,28 @@ icustays
 ```
 
 #Length of ICUSTAYS
-#```{r}
-icustays %>%
+```{r}
+icuduration <- icustays %>%
   select(INTIME, OUTTIME) %>%
-  mutate(icu_in_hour = hour(INTIME)) %>%
-  mutate(icu_out_hour = hour(OUTTIME))
+  mutate(icu_lengthofstay = as.numeric(as.duration(OUTTIME - INTIME) / 86400))
+  icuduration
+```
+
+#Graph length of ICUSTAYS
+**Solution:** The majority of the length of stays are around a few hours-3 days, almost 3,000 patients were counted. There are a few stays that lasts from 50-100 days. I just realized I didn't scroll far enough and there was a column for length of stay...
+```{r}
+icuduration %>%  
+  group_by(icu_lengthofstay) %>%
+  summarize(count = n()) %>%
+  ggplot(aes(x = icu_lengthofstay)) +
+  geom_histogram (bins = 40) +
+  labs(x = "Length of Stay (days)")
+```
+
+#First ICU unit
+```{r}
+icustays %>%
+
 ```
 
 

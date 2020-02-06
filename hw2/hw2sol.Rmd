@@ -371,12 +371,12 @@ joinicustay %>%
 ```
 
 #Tried a different method to see if there was a difference between also adding the admissions and there was no difference.
-```{r}
+#```{r}
 joinicustay2 <- left_join (joinicustay, admissions2)
 joinicustay2
 ```
 
-```{r}
+#```{r}
 joinicustay2 %>%
   group_by(GENDER) %>%
   summarize(count = n()) %>%
@@ -385,6 +385,28 @@ joinicustay2 %>%
 ```
 
 #Age of ICU patients
+```{r}
+icu_ageofadm <- read_csv("/home/203bdata/mimic-iii/ICUSTAYS.csv") %>%
+  select(SUBJECT_ID, INTIME)
+  icu_ageofadm
+```
+
+```{r}
+joined_icu_age <- left_join(icu_ageofadm, patients3) %>%
+  mutate(icuadm_year = year(INTIME)) %>%
+  mutate(icu_aoa = as.numeric(as.duration(icuadm_year - yearofbirth)))
+joined_icu_age
+```
+
+#Graph for icu age of admission
+**Solution:** Similar to the graph in question2, the majority of the ICU age of admissions are around 60-80 years old.There are many counts for 0 and some over the age of 300. This could be the range of the ages in the data that were altered for confidentiality. 
+```{r}
+joined_icu_age %>%
+  group_by(icu_aoa) %>%
+  summarize(count = n()) %>%
+  ggplot(aes(x = icu_aoa, y = count)) +
+  geom_col()
+```
 
 
 ## Q4 

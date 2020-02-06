@@ -337,9 +337,13 @@ icuduration %>%
 ```
 
 #First ICU unit
+**Solution:** From the bar graph, MICU tends to be the highest count for the first care unit with a count of about 22,000 patients. All the other ICU units, such as CCU, NICU, SICU, and TSICU are averaging about 7,000 patients.
 ```{r}
 icustays %>%
-
+  group_by(FIRST_CAREUNIT) %>%
+  summarize(count = n()) %>%
+  ggplot(aes(x = FIRST_CAREUNIT, y = count)) +
+  geom_col()
 ```
 
 

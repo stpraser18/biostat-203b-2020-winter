@@ -346,6 +346,18 @@ icustays %>%
   geom_col()
 ```
 
+#Obtaining gender from the ICU unit
+```{r}
+icustays2 <- icustays %>%
+  select(SUBJECT_ID) %>%
+  distinct(SUBJECT_ID)
+  icustays2
+```
+
+#Joining subject to gender
+```{r}
+left_join(icustays2, patients2)
+```
 
 
 ## Q4 

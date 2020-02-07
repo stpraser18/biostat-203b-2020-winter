@@ -35,9 +35,9 @@ Note it is possible that one patient (uniquely identified by the `SUBJECT_ID`) i
 **Solution**
 
 ```{r}
-library (tidyverse)
-library (lubridate)
-library (dplyr)
+library(tidyverse)
+library(lubridate)
+library(dplyr)
 ```
 
 #Import Data
@@ -129,12 +129,13 @@ admissions %>%
 
 #Number of Admissions/Patient
 
-#``` {r}
+**Solution:** On average, there are about one to two admissions per patient. There are a few that have major peaks that may have 6-7 admissions.
+``` {r}
 admissions %>% 
   group_by(SUBJECT_ID) %>%
   summarize(count = n()) %>%
   ggplot() + 
-  geom_col(x = SUBJECT_ID, y = count)
+  geom_col(aes(x = SUBJECT_ID, y = count))
 ```
 
 #Admission Location
@@ -488,7 +489,7 @@ firsticu <- icustays %>%
 
 #merged unique patients and first care unit
 ```{r}
-joinu_ficu <- left_join(firsticu_unique, firsticu)
+joinu_ficu <- inner_join(firsticu_unique, firsticu, by = "SUBJECT_ID")
 joinu_ficu
 ```
 

@@ -373,6 +373,7 @@ joinicustay
 ```
 
 #Graph gender based on ICUSTAYS
+
 **Solution:** This graph actually looks fairly similar to the previous one that was the gender of the admitted patients. The distinct numbers are fairly close to one another, also. In the graph, there are more males admitted to the ICU compared to females. 
 ```{r}
 joinicustay %>%
@@ -387,7 +388,6 @@ joinicustay %>%
 joinicustay2 <- left_join (joinicustay, admissions2)
 joinicustay2
 ```
-
 #```{r}
 joinicustay2 %>%
   group_by(GENDER) %>%
@@ -404,7 +404,7 @@ icu_ageofadm <- read_csv("/home/203bdata/mimic-iii/ICUSTAYS.csv") %>%
 ```
 
 ```{r}
-joined_icu_age <- left_join(icu_ageofadm, patients3) %>%
+joined_icu_age <- inner_join(icu_ageofadm, patients3, by = "SUBJECT_ID") %>%
   mutate(icuadm_year = year(INTIME)) %>%
   mutate(icu_aoa = as.numeric(as.duration(icuadm_year - yearofbirth)))
 joined_icu_age
@@ -432,13 +432,6 @@ library(htmlwidgets)
 library(stringr)
 ```
 
-#Extracted itemid and value from chartevents
-```{r}
-chartevents <- read_csv("/home/203bdata/mimic-iii/CHARTEVENTS.csv") %>%
-  select(SUBJECT_ID, ITEMID, VALUE) 
-  chartevents
-```
-
 #Extracted itemid and labels that pertains to the measurement method of itemid
 ```{r}
 d_items <- read_csv("/home/203bdata/mimic-iii/D_ITEMS.csv") %>%
@@ -446,31 +439,22 @@ d_items <- read_csv("/home/203bdata/mimic-iii/D_ITEMS.csv") %>%
   d_items
 ```
 
-#Merging chartevents and d_items together
+#Searched for systolic string
+
+#The ITEMID that contains the word systolic are 226850, 226852, 220050, 220059, and 220179.
 ```{r}
-mergechartitems <- left_join(chartevents, d_items)
-mergechartitems
+systolic <- d_items %>%
+  filter(grepl("systolic", LABEL))
+  systolic
 ```
 
-#Find systolic strings in data
-```{r}
-mergechartitems2 <- mergechartitems %>%
-  select(LABEL)
-  mergechartitems2
-```
-#Unique subjects
-#```{r}
-unisubj_id <- read_csv("/home/203bdata/mimic-iii/CHARTEVENTS.csv") %>%
-  select(SUBJECT_ID) %>%
-  distinct(SUBJECT_ID)
-unisubj_id
-```
-#Joined unique subjects, itemid, and value into one table
-#```{r}
-right_join(unisubj_id, chartevents)
-```
 
 Compile a tibble that contains the first ICU stay of unique patients, with the patient's demographic information, the first systolic blood pressure measurement during ICU stay, and whether the patient died within 30 days of hospitcal admission.
+
+```{r}
+icustays_time <- icustays %>%
+  select(SUBJECT_ID, INTIME)
+```
 
 #unique patients from icustays
 ```{r}

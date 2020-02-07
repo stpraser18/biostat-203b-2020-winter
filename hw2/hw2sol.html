@@ -404,12 +404,12 @@ summary {
 <p>Note it is possible that one patient (uniquely identified by the <code>SUBJECT_ID</code>) is admitted into hospital multiple times. When summarizing some demographic information, it makes sense to summarize based on only unique patients.</p>
 <p><strong>Solution</strong></p>
 <pre class="r"><code>library(tidyverse)</code></pre>
-<pre><code>## ── Attaching packages ───────────────────────────────────────────────────────────── tidyverse 1.3.0 ──</code></pre>
+<pre><code>## ── Attaching packages ──────────────────────────────────────── tidyverse 1.3.0 ──</code></pre>
 <pre><code>## ✓ ggplot2 3.2.1     ✓ purrr   0.3.3
 ## ✓ tibble  2.1.3     ✓ dplyr   0.8.3
 ## ✓ tidyr   1.0.0     ✓ stringr 1.4.0
 ## ✓ readr   1.3.1     ✓ forcats 0.4.0</code></pre>
-<pre><code>## ── Conflicts ──────────────────────────────────────────────────────────────── tidyverse_conflicts() ──
+<pre><code>## ── Conflicts ─────────────────────────────────────────── tidyverse_conflicts() ──
 ## x dplyr::filter() masks stats::filter()
 ## x dplyr::lag()    masks stats::lag()</code></pre>
 <pre class="r"><code>library(lubridate)</code></pre>
@@ -656,6 +656,7 @@ summary {
  # mutate(freq = N / sum(N),
   #pct = round((freq*100), 0))</code></pre>
 <p>#Number of Admissions/Patient</p>
+<p><strong>Solution:</strong> On average, there are about one to two admissions per patient. There are a few that have major peaks that may have 6-7 admissions.</p>
 <pre class="r"><code>admissions %&gt;% 
   group_by(SUBJECT_ID) %&gt;%
   summarize(count = n()) %&gt;%
@@ -1048,11 +1049,10 @@ group_by(GENDER) %&gt;%
 ##  9        276 2147-11-20 09:02:23
 ## 10        277 2132-10-21 21:11:46
 ## # … with 61,522 more rows</code></pre>
-<pre class="r"><code>joined_icu_age &lt;- left_join(icu_ageofadm, patients3) %&gt;%
+<pre class="r"><code>joined_icu_age &lt;- inner_join(icu_ageofadm, patients3, by = &quot;SUBJECT_ID&quot;) %&gt;%
   mutate(icuadm_year = year(INTIME)) %&gt;%
-  mutate(icu_aoa = as.numeric(as.duration(icuadm_year - yearofbirth)))</code></pre>
-<pre><code>## Joining, by = &quot;SUBJECT_ID&quot;</code></pre>
-<pre class="r"><code>joined_icu_age</code></pre>
+  mutate(icu_aoa = as.numeric(as.duration(icuadm_year - yearofbirth)))
+joined_icu_age</code></pre>
 <pre><code>## # A tibble: 61,532 x 5
 ##    SUBJECT_ID INTIME              yearofbirth icuadm_year icu_aoa
 ##         &lt;dbl&gt; &lt;dttm&gt;                    &lt;dbl&gt;       &lt;dbl&gt;   &lt;dbl&gt;
@@ -1081,42 +1081,6 @@ group_by(GENDER) %&gt;%
 <p><code>D_ITEMS.csv</code> (<a href="https://mimic.physionet.org/mimictables/d_items/" class="uri">https://mimic.physionet.org/mimictables/d_items/</a>) is the dictionary for the <code>ITEMID</code> in <code>CHARTEVENTS.csv</code>. Find potential values of <code>ITEMID</code> that correspond to systolic blood pressure, i.e., <code>LABEL</code> contains the string <code>systolic</code>.</p>
 <pre class="r"><code>library(htmlwidgets)
 library(stringr)</code></pre>
-<p>#Extracted itemid and value from chartevents</p>
-<pre class="r"><code>chartevents &lt;- read_csv(&quot;/home/203bdata/mimic-iii/CHARTEVENTS.csv&quot;) %&gt;%
-  select(SUBJECT_ID, ITEMID, VALUE) </code></pre>
-<pre><code>## Parsed with column specification:
-## cols(
-##   ROW_ID = col_double(),
-##   SUBJECT_ID = col_double(),
-##   HADM_ID = col_double(),
-##   ICUSTAY_ID = col_double(),
-##   ITEMID = col_double(),
-##   CHARTTIME = col_character(),
-##   STORETIME = col_character(),
-##   CGID = col_double(),
-##   VALUE = col_double(),
-##   VALUENUM = col_double(),
-##   VALUEUOM = col_character(),
-##   WARNING = col_double(),
-##   ERROR = col_double(),
-##   RESULTSTATUS = col_logical(),
-##   STOPPED = col_logical()
-## )</code></pre>
-<pre class="r"><code>  chartevents</code></pre>
-<pre><code>## # A tibble: 1,048,575 x 3
-##    SUBJECT_ID ITEMID  VALUE
-##         &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;
-##  1         36 223834  15   
-##  2         36 223835 100   
-##  3         36 224328   0.37
-##  4         36 224329   6   
-##  5         36 224330   2.5 
-##  6         36 224331   0   
-##  7         36 224332   3   
-##  8         36 224663   8   
-##  9         36 224665   1.11
-## 10         36 220224  58   
-## # … with 1,048,565 more rows</code></pre>
 <p>#Extracted itemid and labels that pertains to the measurement method of itemid</p>
 <pre class="r"><code>d_items &lt;- read_csv(&quot;/home/203bdata/mimic-iii/D_ITEMS.csv&quot;) %&gt;%
   select(ITEMID, LABEL)</code></pre>
@@ -1157,43 +1121,19 @@ library(stringr)</code></pre>
 ##  9    938 blood cultures                             
 ## 10    940 trach care                                 
 ## # … with 12,477 more rows</code></pre>
-<p>#Merging chartevents and d_items together</p>
-<pre class="r"><code>mergechartitems &lt;- left_join(chartevents, d_items)</code></pre>
-<pre><code>## Joining, by = &quot;ITEMID&quot;</code></pre>
-<pre class="r"><code>mergechartitems</code></pre>
-<pre><code>## # A tibble: 1,048,575 x 4
-##    SUBJECT_ID ITEMID  VALUE LABEL                   
-##         &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;chr&gt;                   
-##  1         36 223834  15    O2 Flow                 
-##  2         36 223835 100    Inspired O2 Fraction    
-##  3         36 224328   0.37 PCA dose                
-##  4         36 224329   6    PCA lockout (min)       
-##  5         36 224330   2.5  PCA 1 hour limit        
-##  6         36 224331   0    PCA basal rate (mL/hour)
-##  7         36 224332   3    PCA inject              
-##  8         36 224663   8    PCA attempt             
-##  9         36 224665   1.11 PCA total dose          
-## 10         36 220224  58    Arterial O2 pressure    
-## # … with 1,048,565 more rows</code></pre>
-<p>#Find systolic strings in data</p>
-<pre class="r"><code>mergechartitems2 &lt;- mergechartitems %&gt;%
-  select(LABEL)
-  mergechartitems2</code></pre>
-<pre><code>## # A tibble: 1,048,575 x 1
-##    LABEL                   
-##    &lt;chr&gt;                   
-##  1 O2 Flow                 
-##  2 Inspired O2 Fraction    
-##  3 PCA dose                
-##  4 PCA lockout (min)       
-##  5 PCA 1 hour limit        
-##  6 PCA basal rate (mL/hour)
-##  7 PCA inject              
-##  8 PCA attempt             
-##  9 PCA total dose          
-## 10 Arterial O2 pressure    
-## # … with 1,048,565 more rows</code></pre>
-<p>#Unique subjects #<code>{r} unisubj_id &lt;- read_csv(&quot;/home/203bdata/mimic-iii/CHARTEVENTS.csv&quot;) %&gt;%   select(SUBJECT_ID) %&gt;%   distinct(SUBJECT_ID) unisubj_id</code> #Joined unique subjects, itemid, and value into one table #<code>{r} right_join(unisubj_id, chartevents)</code></p>
+<p>#Searched for systolic string</p>
+<p>#The ITEMID that contains the word systolic are 226850, 226852, 220050, 220059, and 220179.</p>
+<pre class="r"><code>systolic &lt;- d_items %&gt;%
+  filter(grepl(&quot;systolic&quot;, LABEL))
+  systolic</code></pre>
+<pre><code>## # A tibble: 5 x 2
+##   ITEMID LABEL                               
+##    &lt;dbl&gt; &lt;chr&gt;                               
+## 1 226850 RV systolic pressure(PA Line)       
+## 2 226852 PA systolic pressure(PA Line)       
+## 3 220050 Arterial Blood Pressure systolic    
+## 4 220059 Pulmonary Artery Pressure systolic  
+## 5 220179 Non Invasive Blood Pressure systolic</code></pre>
 <p>Compile a tibble that contains the first ICU stay of unique patients, with the patient’s demographic information, the first systolic blood pressure measurement during ICU stay, and whether the patient died within 30 days of hospitcal admission.</p>
 <p>#unique patients from icustays</p>
 <pre class="r"><code>firsticu_unique &lt;- icustays %&gt;%

@@ -40,11 +40,7 @@ library (lubridate)
 library (dplyr)
 ```
 
-##Import data
-````{bash}
-head /home/203bdata/mimic-iii/ADMISSIONS.csv
-```
-
+#Import Data
 ```{r}
 admissions <- read_csv("/home/203bdata/mimic-iii/ADMISSIONS.csv") 
 admissions
@@ -67,6 +63,7 @@ admissionsunique <- read_csv("/home/203bdata/mimic-iii/ADMISSIONS.csv")
 ```
 
 #Admission year bar graph
+
 **Solution:** Since the admission years are over the span of 100 years, the admissions are about on average 2 admissions per day. According to the training that was done for this class, the data span is actually over 10 years, thus the amount displayed should be 10 times more. On average, the admissions are about 20 per day.
 ```{r}
 admissions %>%
@@ -76,6 +73,7 @@ admissions %>%
 ```
 
 #Admission month bar graph
+
 **Solution:** The bar graph seems pretty consistent over each month. The average amount of admission per month is about 5000.
 ```{r}
 admissions %>%
@@ -85,6 +83,7 @@ admissions %>%
 ```
 
 #Admission week day
+
 **Solution:** According to the days of the week, the weekends in the first and last position are much less compared to the week days. Possibly, it could be related to work injuries or the amount of sheer activities that are done on the week days that allow for the admissions to increase during the week days. 
 ```{r}
 admissions %>%
@@ -94,6 +93,7 @@ admissions %>%
 ```
 
 #Admission hour
+
 **Solution:** From the bar graph for the number of admissions per hour, the highest admissions, about 5000, is at the seventh hour. This could most likely mean that there may be the most accidents when people are trying to get to work. Also, at the sixteenth through the eighteenth hour remains consistently high at about 3,500 admissions, which can also mean going back home from work.
 ```{r}
 admissions %>%
@@ -103,6 +103,7 @@ admissions %>%
 ```
 
 #Length of stay
+
 **Solution:** The length of stay is skewed right, which means that the length of stay do not normally last more than 100 days; there are very few that are about 100 days, but very miniscule. The max peak seems to be around 3-5 days. 
 ```{r}
 admissions %>%
@@ -113,6 +114,7 @@ admissions %>%
 ```
 
 #Admission Type
+
 **Solution:** The four types of admission includes: elective, emergency, newborn, and urgent. A little more than 40,000 patients were admitted to the hospital as an emergency, while urgent had the least admissions with about 10,000 admissions.
 ```{r}
 admissions %>% 
@@ -127,13 +129,16 @@ admissions %>%
 
 #Number of Admissions/Patient
 
-``` {r}
+#``` {r}
 admissions %>% 
   group_by(SUBJECT_ID) %>%
-  summarize(count = n()) 
+  summarize(count = n()) %>%
+  ggplot() + 
+  geom_col(x = SUBJECT_ID, y = count)
 ```
 
 #Admission Location
+
 **Solution:** The highest admission location is the emergency room admit, which is coherent with the admission type. The other types of admission locations usually deal with the transferring from different hospital or referred from elsewhere.
 ```{r}
 admissions %>% 
@@ -145,6 +150,7 @@ admissions %>%
 ```
 
 #Insurance sorted by unique values using distinct
+
 **Solution:** The majority of the insurance coverage of the patients come from Medicare, with private being a close second. Very little of the coverage comes from self pay, government, and Medicaid.
 ```{r}
 admissions %>% 
@@ -167,6 +173,7 @@ admissions %>%
 ```
 
 #Language
+
 **Solution:** The majority of the admitted patients tend to speak English with a count of almost 25,000 patients. Additionally, NA was a little higher than English. Most of the languages listed did not have any, there were also very few Spanish speakers, Russian, Portuguese, and a few others. 
 ```{r}
 admissions %>% 
@@ -179,6 +186,7 @@ admissions %>%
 ```
 
 #Religion
+
 **Solution:** The majority of the patients admitted are Catholic, I am a little surprised that Chrisitianity is not a specific option, even though there are options that are branched out from Christianity. This could be a reason patients might choose Catholic, since it is similar in some ways. The other major counts are not specified or unobtainable.
 ```{r}
 admissions %>% 
@@ -191,7 +199,8 @@ admissions %>%
 ```
 
 #Marital Status
-**Solution:** Marital status is represented by a bar graph. The majority of the admitted patients are married
+
+**Solution:** Marital status is represented by a bar graph. The majority of the admitted patients are married, the second major category are single and not available. It is interesting that there were no counts for life partner. 
 ```{r}
 admissions %>% 
   group_by(MARITAL_STATUS) %>%
@@ -203,6 +212,7 @@ admissions %>%
 ```
 
 #Ethnicity
+
 **Solution:** The majority of the admitted patients are white, which is roughly 30,000. The second ethnicity to be admitted are African American and those that are unknown, about 5,000.
 ```{r}
 admissions %>% 
@@ -211,18 +221,19 @@ admissions %>%
   summarize(count = n()) %>%
   ggplot(aes(x = ETHNICITY, y = count)) +
   geom_col() + 
-  theme(axis.text.x = element_text(angle=90, hjust=1))
+  theme(axis.text.x = element_text(angle=90, hjust=1)) +
+  coord_flip()
 ```
 
-
 #Death
-#```{r}
+
+**Solution:** Each year, there are about 100-150 deaths. Due to the data's year span, it should be ten times that amount, thus about 1,000-1,500 deaths/year. 
+```{r}
 admissions %>% 
   group_by(DEATHTIME) %>%
-  distinct(SUBJECT_ID) %>%
   summarize(count = n()) %>%
-  ggplot(aes(x = count, y = DEATHTIME)) +
-  geom_histogram() 
+  ggplot(aes(x = DEATHTIME)) +
+  geom_histogram(bins = 55) 
 ```
 
 
@@ -346,7 +357,7 @@ icustays %>%
   geom_col()
 ```
 
-#Obtaining gender from the ICU unit
+#Obtaining unique patients from the ICU unit
 ```{r}
 icustays2 <- icustays %>%
   select(SUBJECT_ID) %>%
@@ -415,4 +426,102 @@ joined_icu_age %>%
 
 `D_ITEMS.csv` (<https://mimic.physionet.org/mimictables/d_items/>) is the dictionary for the `ITEMID` in `CHARTEVENTS.csv`. Find potential values of `ITEMID` that correspond to systolic blood pressure, i.e., `LABEL` contains the string `systolic`. 
 
+```{r}
+library(htmlwidgets)
+library(stringr)
+```
+
+#Extracted itemid and value from chartevents
+```{r}
+chartevents <- read_csv("/home/203bdata/mimic-iii/CHARTEVENTS.csv") %>%
+  select(SUBJECT_ID, ITEMID, VALUE) 
+  chartevents
+```
+
+#Extracted itemid and labels that pertains to the measurement method of itemid
+```{r}
+d_items <- read_csv("/home/203bdata/mimic-iii/D_ITEMS.csv") %>%
+  select(ITEMID, LABEL)
+  d_items
+```
+
+#Merging chartevents and d_items together
+```{r}
+mergechartitems <- left_join(chartevents, d_items)
+mergechartitems
+```
+
+#Find systolic strings in data
+```{r}
+mergechartitems2 <- mergechartitems %>%
+  select(LABEL)
+  mergechartitems2
+```
+#Unique subjects
+#```{r}
+unisubj_id <- read_csv("/home/203bdata/mimic-iii/CHARTEVENTS.csv") %>%
+  select(SUBJECT_ID) %>%
+  distinct(SUBJECT_ID)
+unisubj_id
+```
+#Joined unique subjects, itemid, and value into one table
+#```{r}
+right_join(unisubj_id, chartevents)
+```
+
 Compile a tibble that contains the first ICU stay of unique patients, with the patient's demographic information, the first systolic blood pressure measurement during ICU stay, and whether the patient died within 30 days of hospitcal admission.
+
+#unique patients from icustays
+```{r}
+firsticu_unique <- icustays %>%
+  distinct(SUBJECT_ID) %>%
+  select(SUBJECT_ID)
+  firsticu_unique
+```
+
+#select first care unit
+```{r}
+firsticu <- icustays %>%
+  select(SUBJECT_ID, FIRST_CAREUNIT)
+  firsticu
+```
+
+#merged unique patients and first care unit
+```{r}
+joinu_ficu <- left_join(firsticu_unique, firsticu)
+joinu_ficu
+```
+
+#unique patients in admissions
+```{r}
+admissions_subj <- admissions %>%
+  select(SUBJECT_ID) %>%
+  distinct(SUBJECT_ID)
+admissions_subj
+```
+
+#demographs of patients in admissions
+```{r}
+demo_adm <- admissions %>%
+  select(SUBJECT_ID, LANGUAGE, ETHNICITY, MARITAL_STATUS)
+  demo_adm
+```
+
+#joined unique patients and demographics of patients in admissions
+```{r}
+joinu_d <- inner_join(admissions_subj, demo_adm, by = "SUBJECT_ID")
+joinu_d
+```
+
+#joined unique patients and first icu units from ICUSTAYS with unique patients & demographics in admissions
+```{r}
+inner_join(joinu_ficu, joinu_d, by = "SUBJECT_ID")
+```
+
+
+
+
+
+
+
+

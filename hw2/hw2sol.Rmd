@@ -476,12 +476,6 @@ ascend_time <- read_csv("/home/203bdata/mimic-iii/ICUSTAYS.csv") %>%
 ascend_time
 ```
 
-#Merge row_id, item_id, and label and row_id, subject_id, intime from icustays
-```{r}
-rowid_subjectid <- inner_join(ditems_row, ascend_time, by = "ROW_ID") %>%
-  select(SUBJECT_ID, ITEMID, LABEL) 
-rowid_subjectid 
-```
 #First systolic blood pressure measurement during ICU stay
 ```{r}
 allinfo <- read_csv("/home/203bdata/mimic-iii/CHARTEVENTS.csv") %>%
@@ -493,7 +487,7 @@ allinfo <- read_csv("/home/203bdata/mimic-iii/CHARTEVENTS.csv") %>%
 allinfo
 ```
 
-#Merge chartevents(subj, icustayid, itemid, value) and d_items(itemid, label) to get the itemid to match the label for the subjects
+#Merge chartevents(subj, icustayid, itemid, value) and d_items(itemid, label) to get the itemid to match the label for the subjects and then filtered for systolic measurements
 ```{r}
 filter_firstsystolic <- inner_join(allinfo, ditems_row, by = "ITEMID") %>%
   filter(grepl("systolic", LABEL)) %>%
@@ -507,6 +501,15 @@ demo_adm <- admissions %>%
   select(SUBJECT_ID, LANGUAGE, ETHNICITY, MARITAL_STATUS)
   demo_adm
 ```
+
+#Merge unique ICU subjects with demographic info, along with systolic measurements and value; USE THIS ONE - IMPORTANT!
+```{r}
+systolic_demo <- 
+  inner_join(filter_firstsystolic, demo_adm, by = "SUBJECT_ID") %>%
+  distinct(SUBJECT_ID, .keep_all = TRUE)
+  systolic_demo
+```
+
 
 #Extracted patients who have died
 ```{r}
@@ -525,7 +528,7 @@ dod_intime <- inner_join(ascend_time, patients_dod, by = "SUBJECT_ID") %>%
 dod_intime
 ```
 
-#Created a new column for the amount of days that died within 30 days of hospital admission
+#Created a new column for the amount of days that died within 30 days of hospital admission; NOT THE FINAL ONE
 ```{r}
 final_within <- dod_intime %>%
   mutate(within_thirtydays = as.numeric(as.duration(dateofdeath - intime_date) / 86400)) %>%
@@ -534,22 +537,21 @@ final_within <- dod_intime %>%
   select(SUBJECT_ID, intime_date, dateofdeath, within_thirtydays)
 final_within
 ```
+#Took out the columns of the dates to make it easier
+```{r}
+final_withindays <- final_within %>%
+  select(SUBJECT_ID, within_thirtydays)
+  final_withindays
+```
+
 #Merged info from patients.csv (subject, year of intime and death, death within 30 years) and chartevents (row, subject, icustayid, itemid, and value)
 ```{r}
-inner_join(ascend_time, allinfo, by = "SUBJECT_ID")
+final_tibble <- 
+  left_join(systolic_demo, final_withindays, by = "SUBJECT_ID") 
+  final_tibble
 ```
 
-
-#joined unique patients and demographics of patients in admissions
-#```{r}
-joinu_d <- inner_join(admissions_subj, demo_adm, by = "SUBJECT_ID")
-joinu_d
-```
-
-#joined unique patients and first icu units from ICUSTAYS with unique patients & demographics in admissions
-#```{r}
-inner_join(joinu_ficu, joinu_d, by = "SUBJECT_ID")
-```
+**Solution:** Looking through a few rows of the subjects, I was very fortunate to not find any patients have passed within the thirty days of the first ICU admission. Although, it could also be human error with the codes. I made a tibble though, with the unique patients from the icustays, demographic information, first systolic measurement and its values, and whether the patient passed away within 30 days (in numbers rather than Y/N).
 
 
 

@@ -452,38 +452,24 @@ systolic <- d_items %>%
 Compile a tibble that contains the first ICU stay of unique patients, with the patient's demographic information, the first systolic blood pressure measurement during ICU stay, and whether the patient died within 30 days of hospitcal admission.
 
 ```{r}
-icustays_time <- icustays %>%
-  select(SUBJECT_ID, INTIME)
+icustays_time <- read_csv("/home/203bdata/mimic-iii/ICUSTAYS.csv") %>%
+  select(SUBJECT_ID, INTIME) %>%
+  group_by(SUBJECT_ID)
+  icustays_time
+```
+#arranged the subjects and intime by ascending order and was able to extract the distinct subjects with the first time they were in the ICU 
+
+```{r}
+ascend_time <- read_csv("/home/203bdata/mimic-iii/ICUSTAYS.csv") %>%
+  select(SUBJECT_ID, INTIME) %>%
+  arrange(SUBJECT_ID, INTIME) %>%
+  group_by(SUBJECT_ID) %>%
+  distinct(SUBJECT_ID, .keep_all = TRUE)
+ascend_time
 ```
 
-#unique patients from icustays
-```{r}
-firsticu_unique <- icustays %>%
-  distinct(SUBJECT_ID) %>%
-  select(SUBJECT_ID)
-  firsticu_unique
-```
 
-#select first care unit
-```{r}
-firsticu <- icustays %>%
-  select(SUBJECT_ID, FIRST_CAREUNIT)
-  firsticu
-```
 
-#merged unique patients and first care unit
-```{r}
-joinu_ficu <- inner_join(firsticu_unique, firsticu, by = "SUBJECT_ID")
-joinu_ficu
-```
-
-#unique patients in admissions
-```{r}
-admissions_subj <- admissions %>%
-  select(SUBJECT_ID) %>%
-  distinct(SUBJECT_ID)
-admissions_subj
-```
 
 #demographs of patients in admissions
 ```{r}
@@ -492,14 +478,39 @@ demo_adm <- admissions %>%
   demo_adm
 ```
 
-#joined unique patients and demographics of patients in admissions
+#Extracted patients who have died
 ```{r}
+patients_dod <- read_csv("/home/203bdata/mimic-iii/PATIENTS.csv") %>%
+  select(SUBJECT_ID, DOD) %>%
+  group_by(SUBJECT_ID) %>%
+  distinct(SUBJECT_ID, DOD, .keep_all = TRUE)
+  patients_dod
+```
+#Joined date of death to the subject intime to determine if they died within 30 days
+```{r}
+dod_intime <- inner_join(ascend_time, patients_dod, by = "SUBJECT_ID") %>%
+  mutate(intime_date = date(INTIME)) %>%
+  mutate(dateofdeath = date(DOD))
+dod_intime
+```
+#Created a new column for the amount of days that died within 30 days of hospital admission
+```{r}
+final_within <- dod_intime %>%
+  mutate(within_days = as.numeric(as.duration(dateofdeath - intime_date) / 86400)) %>%
+  drop_na() %>%
+  filter(within_days < 30)
+final_within
+```
+
+
+#joined unique patients and demographics of patients in admissions
+#```{r}
 joinu_d <- inner_join(admissions_subj, demo_adm, by = "SUBJECT_ID")
 joinu_d
 ```
 
 #joined unique patients and first icu units from ICUSTAYS with unique patients & demographics in admissions
-```{r}
+#```{r}
 inner_join(joinu_ficu, joinu_d, by = "SUBJECT_ID")
 ```
 

@@ -451,9 +451,17 @@ systolic <- d_items %>%
 
 Compile a tibble that contains the first ICU stay of unique patients, with the patient's demographic information, the first systolic blood pressure measurement during ICU stay, and whether the patient died within 30 days of hospitcal admission.
 
+#Since d_items didn't have a column for row_id, thus merging d_items to icustays
+```{r}
+ditems_row <- read_csv("/home/203bdata/mimic-iii/D_ITEMS.csv") %>%
+  select(ROW_ID, ITEMID, LABEL)
+ditems_row
+```
+
+
 ```{r}
 icustays_time <- read_csv("/home/203bdata/mimic-iii/ICUSTAYS.csv") %>%
-  select(SUBJECT_ID, INTIME) %>%
+  select(ROW_ID, SUBJECT_ID, INTIME) %>%
   group_by(SUBJECT_ID)
   icustays_time
 ```
@@ -461,13 +469,19 @@ icustays_time <- read_csv("/home/203bdata/mimic-iii/ICUSTAYS.csv") %>%
 
 ```{r}
 ascend_time <- read_csv("/home/203bdata/mimic-iii/ICUSTAYS.csv") %>%
-  select(SUBJECT_ID, INTIME) %>%
+  select(ROW_ID, SUBJECT_ID, INTIME) %>%
   arrange(SUBJECT_ID, INTIME) %>%
   group_by(SUBJECT_ID) %>%
   distinct(SUBJECT_ID, .keep_all = TRUE)
 ascend_time
 ```
 
+#Merge row_id, item_id, and label and row_id, subject_id, intime from icustays
+```{r}
+rowid_subjectid <- inner_join(ditems_row, ascend_time, by = "ROW_ID") %>%
+  select(ROW_ID, SUBJECT_ID, ITEMID, LABEL)
+rowid_subjectid 
+```
 
 
 

@@ -129,39 +129,6 @@ Some useful resources for mapping:
 - The book [_Geocomputation with R_](https://geocompr.robinlovelace.net). Especially [Chapter 8 Making Maps with R](https://geocompr.robinlovelace.net/adv-map.html).  
 - The book [_An Introduction to Spatial Analysis and Mapping in R_](https://bookdown.org/lexcomber/brunsdoncomber2e/). 
 
-### Use mapdata - **MAP IS TOO OLD**
-
-The package `mapdata` contains a data `china`. But the map seems out-dated. For example, Chongqing is sill a part of Sichuan province in this map.
-#```{r}
-suppressMessages(library(mapdata))
-map("china", col = "gray40", ylim = c(18,54))
-```
-
-### Use GADM data - **THIS IS VERY SLOW**
-
-Download GADM data for China at <https://www.gadm.org/download_country_v3.html>. There are 4 levels of details to plot. We opt for the level 1 which is at the province level.
-
-```{r}
-library(sf)
-library(tidyverse)
-gadm36_CHN_1_sf <- readRDS("gadm36_CHN_0_sf.rds")
-ggplot(data = gadm36_CHN_1_sf) + 
-  geom_sf()
-```
-
-```{r, eval = FALSE}
-library("GADMTools")
-map <- gadm_sp_loadCountries("CHN", level = 1, basefile = "./")
-gadm_plot(map) + theme_light()
-```
-
-### Use shapefile from GADM - **THIS IS VERY SLOW**
-
-```{r, eval = FALSE}
-library(maptools)
-map <- rgdal::readOGR("gadm36_CHN_shp/gadm36_CHN_1.shp")
-plot(map)
-```
 
 ### Use GIS data from China
 

@@ -100,7 +100,7 @@ awk -F, '{ print $14 }' /home/203bdata/mimic-iii/ADMISSIONS.csv | tail -n+2 | so
 
 **Solution:** There are 58,768 unique patients in the admissions data file.
 ``` {bash, eval=TRUE}
-cut -d ' ' -f2 /home/203bdata/mimic-iii/ADMISSIONS.csv | sort -u | wc -l
+cut -d ',' -f2 /home/203bdata/mimic-iii/ADMISSIONS.csv | sort -u | wc -l
 ```
 
 

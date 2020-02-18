@@ -1,0 +1,562 @@
+---
+title: "Biostat 203B Homework 2 Solutions"
+author: Supasara Prasertphong
+subtitle: Due Feb 7 @ 11:59PM
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Use tidyverse (ggpot2, dplyr) to explore the [MIMIC-III](https://mimic.physionet.org) data introduced in [homework 1](https://ucla-biostat203b-2020winter.github.io/hw/hw1/hw1.html).
+
+## Q1
+
+Demographic information of the patients admitted into hospital is available in `ADMISSION.csv`. See <https://mimic.physionet.org/mimictables/admissions/> for details of each field in this file. Summarize following variables using appropriate graphs:   
+
+  - admission year  
+- admission month  
+- admission week day  
+- admission hour
+- length of hospital stay  
+- admission type  
+- number of admissions per patient  
+- admission location  
+- insurance  
+- language  
+- religion  
+- martial status  
+- ethnicity  
+- death 
+
+Note it is possible that one patient (uniquely identified by the `SUBJECT_ID`) is admitted into hospital multiple times. When summarizing some demographic information, it makes sense to summarize based on only unique patients. 
+
+**Solution**
+
+```{r}
+library(tidyverse)
+library(lubridate)
+library(dplyr)
+```
+
+#Import Data
+```{r}
+admissions <- read_csv("/home/203bdata/mimic-iii/ADMISSIONS.csv") 
+admissions
+admissions %>% print(width = Inf)
+```
+
+#Found unique values
+```{r}
+admissionsunique <- read_csv("/home/203bdata/mimic-iii/ADMISSIONS.csv")
+  admissionsunique %>% 
+  summarise_all(n_distinct) %>%
+  select(SUBJECT_ID)
+```
+
+#Listed all the unique values
+```{r}
+admissionsunique <- read_csv("/home/203bdata/mimic-iii/ADMISSIONS.csv")
+  admissionsunique %>% 
+  distinct(SUBJECT_ID)
+```
+
+#Admission year bar graph
+
+**Solution:** Since the admission years are over the span of 100 years, the admissions are about on average 2 admissions per day. According to the training that was done for this class, the data span is actually over 10 years, thus the amount displayed should be 10 times more. On average, the admissions are about 20 per day.
+```{r}
+admissions %>%
+  mutate(adm_year = year(ADMITTIME)) %>%
+  ggplot() + 
+  geom_bar(mapping = aes(x = adm_year))
+```
+
+#Admission month bar graph
+
+**Solution:** The bar graph seems pretty consistent over each month. The average amount of admission per month is about 5000.
+```{r}
+admissions %>%
+  mutate(adm_month = month(ADMITTIME)) %>%
+  ggplot() + 
+  geom_bar(mapping = aes(x = adm_month))
+```
+
+#Admission week day
+
+**Solution:** According to the days of the week, the weekends in the first and last position are much less compared to the week days. Possibly, it could be related to work injuries or the amount of sheer activities that are done on the week days that allow for the admissions to increase during the week days. 
+```{r}
+admissions %>%
+  mutate(wday = wday(ADMITTIME)) %>%
+  ggplot() + 
+  geom_bar(mapping = aes(x = wday))
+```
+
+#Admission hour
+
+**Solution:** From the bar graph for the number of admissions per hour, the highest admissions, about 5000, is at the seventh hour. This could most likely mean that there may be the most accidents when people are trying to get to work. Also, at the sixteenth through the eighteenth hour remains consistently high at about 3,500 admissions, which can also mean going back home from work.
+```{r}
+admissions %>%
+  mutate(hour = hour(ADMITTIME)) %>%
+  ggplot() + 
+  geom_bar(mapping = aes(x = hour))
+```
+
+#Length of stay
+
+**Solution:** The length of stay is skewed right, which means that the length of stay do not normally last more than 100 days; there are very few that are about 100 days, but very miniscule. The max peak seems to be around 3-5 days. 
+```{r}
+admissions %>%
+  mutate(los_days = as.numeric(as.duration(DISCHTIME - ADMITTIME) / 86400)) %>%
+  ggplot(aes(x = los_days)) + 
+  geom_histogram (bins = 100) + 
+  labs(x = "Length of Stay (days)")
+```
+
+#Admission Type
+
+**Solution:** The four types of admission includes: elective, emergency, newborn, and urgent. A little more than 40,000 patients were admitted to the hospital as an emergency, while urgent had the least admissions with about 10,000 admissions.
+```{r}
+admissions %>% 
+  group_by(ADMISSION_TYPE) %>%
+  summarize(count = n()) %>%
+  ggplot(aes(x = ADMISSION_TYPE, y = count)) +
+  geom_col()
+#%>%
+ # mutate(freq = N / sum(N),
+  #pct = round((freq*100), 0))
+```
+
+#Number of Admissions/Patient
+
+**Solution:** On average, there are about one to two admissions per patient. There are a few that have major peaks that may have 6-7 admissions.
+``` {r}
+admissions %>% 
+  group_by(SUBJECT_ID) %>%
+  summarize(count = n()) %>%
+  ggplot() + 
+  geom_col(aes(x = SUBJECT_ID, y = count))
+```
+
+#Admission Location
+
+**Solution:** The highest admission location is the emergency room admit, which is coherent with the admission type. The other types of admission locations usually deal with the transferring from different hospital or referred from elsewhere.
+```{r}
+admissions %>% 
+  group_by(ADMISSION_LOCATION) %>%
+  summarize(count = n()) %>%
+  ggplot(aes(x = ADMISSION_LOCATION, y = count)) +
+  geom_col() +  
+  theme(axis.text.x = element_text(angle=90, hjust=1))
+```
+
+#Insurance sorted by unique values using distinct
+
+**Solution:** The majority of the insurance coverage of the patients come from Medicare, with private being a close second. Very little of the coverage comes from self pay, government, and Medicaid.
+```{r}
+admissions %>% 
+  group_by(INSURANCE) %>%
+  distinct(SUBJECT_ID) %>%
+  summarize(count = n()) %>%
+  ggplot(aes(x = INSURANCE, y = count)) +
+  geom_col() + 
+  theme(axis.text.x = element_text(angle=90, hjust=1))
+```
+
+#Insurance without unique values
+```{r}
+admissions %>% 
+  group_by(INSURANCE) %>%
+  summarize(count = n()) %>%
+  ggplot(aes(x = INSURANCE, y = count)) +
+  geom_col() + 
+  theme(axis.text.x = element_text(angle=90, hjust=1))
+```
+
+#Language
+
+**Solution:** The majority of the admitted patients tend to speak English with a count of almost 25,000 patients. Additionally, NA was a little higher than English. Most of the languages listed did not have any, there were also very few Spanish speakers, Russian, Portuguese, and a few others. 
+```{r}
+admissions %>% 
+  group_by(LANGUAGE) %>%
+  distinct(SUBJECT_ID) %>%
+  summarize(count = n()) %>%
+  ggplot(aes(x = LANGUAGE, y = count)) +
+  geom_col() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+#Religion
+
+**Solution:** The majority of the patients admitted are Catholic, I am a little surprised that Chrisitianity is not a specific option, even though there are options that are branched out from Christianity. This could be a reason patients might choose Catholic, since it is similar in some ways. The other major counts are not specified or unobtainable.
+```{r}
+admissions %>% 
+  group_by(RELIGION) %>%
+  distinct(SUBJECT_ID) %>%
+  summarize(count = n()) %>%
+  ggplot(aes(x = RELIGION, y = count)) +
+  geom_col() + 
+  theme(axis.text.x = element_text(angle=90, hjust=1))
+```
+
+#Marital Status
+
+**Solution:** Marital status is represented by a bar graph. The majority of the admitted patients are married, the second major category are single and not available. It is interesting that there were no counts for life partner. 
+```{r}
+admissions %>% 
+  group_by(MARITAL_STATUS) %>%
+  distinct(SUBJECT_ID) %>%
+  summarize(count = n()) %>%
+  ggplot(aes(x = MARITAL_STATUS, y = count)) +
+  geom_col() + 
+  theme(axis.text.x = element_text(angle=90, hjust=1))
+```
+
+#Ethnicity
+
+**Solution:** The majority of the admitted patients are white, which is roughly 30,000. The second ethnicity to be admitted are African American and those that are unknown, about 5,000.
+```{r}
+admissions %>% 
+  group_by(ETHNICITY) %>%
+  distinct(SUBJECT_ID) %>%
+  summarize(count = n()) %>%
+  ggplot(aes(x = ETHNICITY, y = count)) +
+  geom_col() + 
+  theme(axis.text.x = element_text(angle=90, hjust=1)) +
+  coord_flip()
+```
+
+#Death
+
+**Solution:** Each year, there are about 100-150 deaths. Due to the data's year span, it should be ten times that amount, thus about 1,000-1,500 deaths/year. 
+```{r}
+admissions %>% 
+  group_by(DEATHTIME) %>%
+  summarize(count = n()) %>%
+  ggplot(aes(x = DEATHTIME)) +
+  geom_histogram(bins = 55) 
+```
+
+
+## Q2
+
+Link the data in `ADMISSION.csv` and `PATIENTS.csv` (<https://mimic.physionet.org/mimictables/patients/>) and summarize following variables using appropriate graphs:  
+
+- gender  
+- age at admission
+
+```{r}
+patients <- read_csv("/home/203bdata/mimic-iii/PATIENTS.csv") 
+patients
+```
+
+#Extracted unique subject_id column from admissions 
+```{r}
+admissions2 <- admissions %>% 
+  select(SUBJECT_ID) %>%
+  distinct(SUBJECT_ID)
+  admissions2
+```
+
+
+#Extracted subject_id and gender from patients to merge together
+```{r}
+patients2 <- patients %>% 
+  select (SUBJECT_ID, GENDER) %>%
+  distinct(SUBJECT_ID, GENDER)
+  patients2
+```
+
+
+#Merged the subject_id's together to determine their gender
+**Solution:** There are more male admission patients compared to females. There are about 25,000 male patients, whereas females are about 21,000. 
+```{r}
+left_join(admissions2, patients2) %>%
+group_by(GENDER) %>%
+  summarize(count = n()) %>%
+  ggplot() + 
+  geom_col(mapping = aes(x = GENDER, y = count))
+```
+
+#Extracted subject_id and admission time, also need to extract year
+```{r}
+admissions3 <- admissions %>% 
+  select (SUBJECT_ID, ADMITTIME) %>%
+  mutate(adm_year = year(ADMITTIME)) %>%
+  select(SUBJECT_ID, adm_year)
+  admissions3
+```
+
+#Extracted subject_id and date of birth, need to extract year
+```{r}
+patients3 <- patients %>% 
+  select (SUBJECT_ID, DOB) %>%
+  mutate(yearofbirth = year(DOB)) %>%
+  select (SUBJECT_ID, yearofbirth)
+  patients3
+```
+
+#Joined subject id, year of birth, and year of admission together and created a new column
+```{r}
+joinage <- full_join(admissions3, patients3) %>%
+  mutate(age_adm = as.numeric(as.duration(adm_year - yearofbirth)))
+  joinage
+```
+ 
+#Created a graph based on the age admissions
+**Solution:** The data seems a little odd as there are many patients that are above 300, but there are about 8,000 patients that are 0 years which could be dealing with newborns. On average, there are about 1,000 patients that are about 60 to 90 over the span of the data.
+```{r}
+joinage %>%
+  group_by(age_adm) %>%
+  summarize(count = n()) %>%
+  ggplot(aes(x = age_adm, y = count)) +
+  geom_col()
+```
+
+
+## Q3
+
+`ICUSTAYS.csv` (<https://mimic.physionet.org/mimictables/icustays/>) contains data about Intensive Care Units (ICU) stays. Summarize following variables using appropriate graphs:  
+
+- length of ICU stay  
+- first ICU unit  
+- gender  
+- age  
+
+#Load ICUSTAYS file
+```{r}
+icustays <- read_csv("/home/203bdata/mimic-iii/ICUSTAYS.csv")
+icustays
+```
+
+#Length of ICUSTAYS
+```{r}
+icuduration <- icustays %>%
+  select(INTIME, OUTTIME) %>%
+  mutate(icu_lengthofstay = as.numeric(as.duration(OUTTIME - INTIME) / 86400))
+  icuduration
+```
+
+#Graph length of ICUSTAYS
+**Solution:** The majority of the length of stays are around a few hours-3 days, almost 3,000 patients were counted. There are a few stays that lasts from 50-100 days. I just realized I didn't scroll far enough and there was a column for length of stay...
+```{r}
+icuduration %>%  
+  group_by(icu_lengthofstay) %>%
+  summarize(count = n()) %>%
+  ggplot(aes(x = icu_lengthofstay)) +
+  geom_histogram (bins = 40) +
+  labs(x = "Length of Stay (days)")
+```
+
+#First ICU unit
+**Solution:** From the bar graph, MICU tends to be the highest count for the first care unit with a count of about 22,000 patients. All the other ICU units, such as CCU, NICU, SICU, and TSICU are averaging about 7,000 patients.
+```{r}
+icustays %>%
+  group_by(FIRST_CAREUNIT) %>%
+  summarize(count = n()) %>%
+  ggplot(aes(x = FIRST_CAREUNIT, y = count)) +
+  geom_col()
+```
+
+#Obtaining unique patients from the ICU unit
+```{r}
+icustays2 <- icustays %>%
+  select(SUBJECT_ID) %>%
+  distinct(SUBJECT_ID)
+  icustays2
+```
+
+#Joining distinct subjects to gender
+```{r}
+joinicustay <- left_join(icustays2, patients2)
+joinicustay
+```
+
+#Graph gender based on ICUSTAYS
+
+**Solution:** This graph actually looks fairly similar to the previous one that was the gender of the admitted patients. The distinct numbers are fairly close to one another, also. In the graph, there are more males admitted to the ICU compared to females. 
+```{r}
+joinicustay %>%
+  group_by(GENDER) %>%
+  summarize(count = n()) %>%
+  ggplot(aes(x = GENDER, y = count)) +
+  geom_col()
+```
+
+#Tried a different method to see if there was a difference between also adding the admissions and there was no difference.
+#```{r}
+joinicustay2 <- left_join (joinicustay, admissions2)
+joinicustay2
+```
+#```{r}
+joinicustay2 %>%
+  group_by(GENDER) %>%
+  summarize(count = n()) %>%
+  ggplot(aes(x = GENDER, y = count)) +
+  geom_col()
+```
+
+#Age of ICU patients
+```{r}
+icu_ageofadm <- read_csv("/home/203bdata/mimic-iii/ICUSTAYS.csv") %>%
+  select(SUBJECT_ID, INTIME)
+  icu_ageofadm
+```
+
+```{r}
+joined_icu_age <- inner_join(icu_ageofadm, patients3, by = "SUBJECT_ID") %>%
+  mutate(icuadm_year = year(INTIME)) %>%
+  mutate(icu_aoa = as.numeric(as.duration(icuadm_year - yearofbirth)))
+joined_icu_age
+```
+
+#Graph for icu age of admission
+**Solution:** Similar to the graph in question2, the majority of the ICU age of admissions are around 60-80 years old.There are many counts for 0 and some over the age of 300. This could be the range of the ages in the data that were altered for confidentiality. 
+```{r}
+joined_icu_age %>%
+  group_by(icu_aoa) %>%
+  summarize(count = n()) %>%
+  ggplot(aes(x = icu_aoa, y = count)) +
+  geom_col()
+```
+
+
+## Q4 
+
+`CHARTEVENTS.csv` (<https://mimic.physionet.org/mimictables/chartevents/>) contains all the charted data available for a patient. During their ICU stay, the primary repository of a patient’s information is their electronic chart. The `ITEMID` variable indicates a single measurement type in the database. The `VALUE` variable is the value measured for `ITEMID`. 
+
+`D_ITEMS.csv` (<https://mimic.physionet.org/mimictables/d_items/>) is the dictionary for the `ITEMID` in `CHARTEVENTS.csv`. Find potential values of `ITEMID` that correspond to systolic blood pressure, i.e., `LABEL` contains the string `systolic`. 
+
+```{r}
+library(htmlwidgets)
+library(stringr)
+```
+
+#Extracted itemid and labels that pertains to the measurement method of itemid
+```{r}
+d_items <- read_csv("/home/203bdata/mimic-iii/D_ITEMS.csv") %>%
+  select(ITEMID, LABEL)
+  d_items
+```
+
+#Searched for systolic string.
+
+#The ITEMID that contains the word systolic are 226850, 226852, 220050, 220059, and 220179.
+```{r}
+systolic <- d_items %>%
+  filter(grepl("systolic", LABEL))
+  systolic
+```
+
+
+Compile a tibble that contains the first ICU stay of unique patients, with the patient's demographic information, the first systolic blood pressure measurement during ICU stay, and whether the patient died within 30 days of hospital admission.
+
+#Since d_items didn't have a column for row_id, thus merging d_items to icustays
+```{r}
+ditems_row <- read_csv("/home/203bdata/mimic-iii/D_ITEMS.csv") %>%
+  select(ITEMID, LABEL)
+ditems_row
+```
+
+
+```{r}
+icustays_time <- read_csv("/home/203bdata/mimic-iii/ICUSTAYS.csv") %>%
+  select(ROW_ID, SUBJECT_ID, INTIME) %>%
+  group_by(SUBJECT_ID)
+  icustays_time
+```
+#arranged the subjects and intime by ascending order and was able to extract the distinct subjects with the first time they were in the ICU 
+
+```{r}
+ascend_time <- read_csv("/home/203bdata/mimic-iii/ICUSTAYS.csv") %>%
+  select(SUBJECT_ID, ICUSTAY_ID, INTIME) %>%
+  arrange(SUBJECT_ID, INTIME) %>%
+  group_by(SUBJECT_ID) %>%
+  distinct(SUBJECT_ID, .keep_all = TRUE)
+ascend_time
+```
+
+#First systolic blood pressure measurement during ICU stay
+```{r}
+allinfo <- read_csv("/home/203bdata/mimic-iii/CHARTEVENTS.csv") %>%
+  select(SUBJECT_ID, ICUSTAY_ID, ITEMID, VALUE) %>%
+  group_by(SUBJECT_ID) %>%
+  arrange(SUBJECT_ID) %>%
+  distinct(SUBJECT_ID, .keep_all = TRUE) %>%
+  select(SUBJECT_ID, ICUSTAY_ID, VALUE, ITEMID)
+allinfo
+```
+
+#Merge chartevents(subj, icustayid, itemid, value) and d_items(itemid, label) to get the itemid to match the label for the subjects and then filtered for systolic measurements
+```{r}
+filter_firstsystolic <- inner_join(allinfo, ditems_row, by = "ITEMID") %>%
+  filter(grepl("systolic", LABEL)) %>%
+  select(SUBJECT_ID, ICUSTAY_ID, ITEMID, LABEL, VALUE)
+filter_firstsystolic
+```
+
+#demographs of patients in admissions
+```{r}
+demo_adm <- admissions %>%
+  select(SUBJECT_ID, LANGUAGE, ETHNICITY, MARITAL_STATUS)
+  demo_adm
+```
+
+#Merge unique ICU subjects with demographic info, along with systolic measurements and value; USE THIS ONE - IMPORTANT!
+```{r}
+systolic_demo <- 
+  inner_join(filter_firstsystolic, demo_adm, by = "SUBJECT_ID") %>%
+  distinct(SUBJECT_ID, .keep_all = TRUE)
+  systolic_demo
+```
+
+
+#Extracted patients who have died
+```{r}
+patients_dod <- read_csv("/home/203bdata/mimic-iii/PATIENTS.csv") %>%
+  select(SUBJECT_ID, DOD) %>%
+  group_by(SUBJECT_ID) %>%
+  distinct(SUBJECT_ID, DOD, .keep_all = TRUE)
+  patients_dod
+```
+
+#Joined date of death to the subject intime to determine if they died within 30 days
+```{r}
+dod_intime <- inner_join(ascend_time, patients_dod, by = "SUBJECT_ID") %>%
+  mutate(intime_date = date(INTIME)) %>%
+  mutate(dateofdeath = date(DOD))
+dod_intime
+```
+
+#Created a new column for the amount of days that died within 30 days of hospital admission; NOT THE FINAL ONE
+```{r}
+final_within <- dod_intime %>%
+  mutate(within_thirtydays = as.numeric(as.duration(dateofdeath - intime_date) / 86400)) %>%
+  drop_na() %>%
+  filter(within_thirtydays < 30) %>%
+  select(SUBJECT_ID, intime_date, dateofdeath, within_thirtydays)
+final_within
+```
+#Took out the columns of the dates to make it easier
+```{r}
+final_withindays <- final_within %>%
+  select(SUBJECT_ID, within_thirtydays)
+  final_withindays
+```
+
+#Merged info from patients.csv (subject, year of intime and death, death within 30 years) and chartevents (row, subject, icustayid, itemid, and value)
+```{r}
+final_tibble <- 
+  left_join(systolic_demo, final_withindays, by = "SUBJECT_ID") 
+  final_tibble
+```
+
+**Solution:** Looking through a few rows of the subjects, I was very fortunate to not find any patients have passed within the thirty days of the first ICU admission. Although, it could also be human error with the codes. I made a tibble though, with the unique patients from the icustays, demographic information, first systolic measurement and its values, and whether the patient passed away within 30 days (in numbers rather than Y/N).
+
+
+
+
+
+
+
+

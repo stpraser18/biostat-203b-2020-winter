@@ -1,0 +1,19 @@
+for (r in 1:rep) {
+  #stimulate data
+  if (dist == "gaussian") {
+    x = rnorm(n)
+  } else if (dist == "t1") {
+    x = rt(n, df = 1)
+  } else if (dist == "t5") {
+    x = rt(n, df = 5)
+  } else {
+    stop("unrecognized distribution")
+  }
+  # try two methods
+  mseSampAvg = mseSampAvg + mean(x)^2
+  msePrimeAvg = msemsePrimeAvg + estMeanPrimes(x)^2
+}
+
+print(mseSampAvg / rep)
+print(msePrimeAvg / rep)
+

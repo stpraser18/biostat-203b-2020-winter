@@ -1,0 +1,6 @@
+mypath = ":/home/stpraser18/biostat-203b-2020-winter/HW1"
+setwd(mypath)
+
+txt_files_ls = list.files(path=mypath, pattern="*.txt")
+txt_files_df <- lapply(txt_files_ls, function(x) {read.table(file = x, header = T, sep =",")})
+combined_df <- do.call("rbind", lapply(txt_files_df, as.data.frame)) 

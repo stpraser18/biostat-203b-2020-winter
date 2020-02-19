@@ -252,6 +252,7 @@ translate <- function(x) {
   })
 }
 ```
+
 Create a new variable `NAME_ENG`:
 ```{r}
 chn_prov <- chn_map %>% 
@@ -305,6 +306,7 @@ ncov_tbl %>%
 ```
 
 To plot the line graph of confirmed cases over time:
+
 ```{r}
 ncov_tbl %>%
   filter(`Country/Region` %in% c("Mainland China", "Macau", "Hong Kong", "Taiwan")) %>%
@@ -318,5 +320,22 @@ ncov_tbl %>%
   labs(y = "Count") + 
   theme_bw()
 ```
+```{r}
+library(httr)
+library(tidyverse)
+library(tibble)
+```
 
-
+```{r}
+coronavirus_confirmed <- GET("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv")
+  print(coronavirus_confirmed)
+  #as_tibble(coronavirus_confirmed)
+```
+```{r}
+coronavirus_deaths <- GET("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Deaths.csv")
+  print(coronavirus_deaths)
+```
+```{r}
+coronavirus_recovered <- GET("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Recovered.csv")
+  print(coronavirus_recovered)
+```

@@ -321,9 +321,10 @@ ncov_tbl %>%
   theme_bw()
 ```
 ```{r}
-library(httr)
-library(tidyverse)
-library(tibble)
+library("httr")
+library("tidyverse")
+library("tibble")
+library("maps")
 ```
 
 ```{r}
@@ -338,4 +339,20 @@ coronavirus_deaths <- GET("https://raw.githubusercontent.com/CSSEGISandData/COVI
 ```{r}
 coronavirus_recovered <- GET("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Recovered.csv")
   print(coronavirus_recovered)
+```
+#Obtaining US Map
+```{r}
+us_states <- map_data("state")
+head(us_states)
+```
+#Outlining US Map
+```{r}
+us_map <- ggplot(data = us_states,
+            mapping = aes(x = long, y = lat,
+                          group = group))
+us_map + geom_polygon(fill = "white", color = "black")
+```
+
+```{r}
+data(usaMapEnv)
 ```

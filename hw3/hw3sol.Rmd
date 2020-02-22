@@ -24,13 +24,6 @@ knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
 
 Below is some data exploration, which may help you get started. You do _not_ have to use it. Note below code may change frequently.
 
-<!-- Johns Hopkins CSSE Visualization: <https://gisanddata.maps.arcgis.com/apps/opsdashboard/index.html#/bda7594740fd40299423467b48e9ecf6> -->
-
-<!-- Downloadable Google sheet: -->
-<!-- <https://docs.google.com/spreadsheets/d/1wQVypefm946ch4XDp37uZ-wartW4V7ILdg-qYiDXUHM/edit#gid=787605648> -->
-
-<!-- Time series table: <https://docs.google.com/spreadsheets/d/1UF2pSkFTURko2OvfHWWlFpDFAr1UxCBA4JLwlSP6KFo/edit#gid=0> -->
-
 ```{r}
 library(tidyverse)
 library(lubridate)
@@ -171,6 +164,7 @@ ncov_tbl %>%
   distinct(`Province/State`, `Country/Region`) %>%
   print(n = Inf)
 ```
+
 In order to join the tibbles `ncov_tbl` and `chn_map`, we need to use the province name as key. Let's create a function to translate Chinese province name to English.
 ```{r}
 translate <- function(x) {
@@ -320,6 +314,7 @@ ncov_tbl %>%
   labs(y = "Count") + 
   theme_bw()
 ```
+
 ```{r}
 library("httr")
 library("tidyverse")
@@ -327,24 +322,12 @@ library("tibble")
 library("maps")
 ```
 
-```{r}
-coronavirus_confirmed <- GET("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv")
-  print(coronavirus_confirmed)
-  #as_tibble(coronavirus_confirmed)
-```
-```{r}
-coronavirus_deaths <- GET("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Deaths.csv")
-  print(coronavirus_deaths)
-```
-```{r}
-coronavirus_recovered <- GET("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Recovered.csv")
-  print(coronavirus_recovered)
-```
 #Obtaining US Map
 ```{r}
 us_states <- map_data("state")
 head(us_states)
 ```
+
 #Outlining US Map
 ```{r}
 us_map <- ggplot(data = us_states,
@@ -353,6 +336,14 @@ us_map <- ggplot(data = us_states,
 us_map + geom_polygon(fill = "white", color = "black")
 ```
 
+#Tidy data for US, sliced last column for total amount of cases
 ```{r}
-data(usaMapEnv)
+us_confirmed <- confirmed %>%
+  filter(`Country/Region` %in% c("US")) %>%
+  pivot_longer(-(`Province/State`:Long), 
+    names_to = "Date", values_to = "confirmed") %>%
+  mutate(Date = (ymd(Date)))  %>%
+  group_by(`Province/State`) %>%
+  slice(n())
+us_confirmed
 ```

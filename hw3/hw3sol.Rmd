@@ -28,7 +28,10 @@ Below is some data exploration, which may help you get started. You do _not_ hav
 library(tidyverse)
 library(lubridate)
 library(sf)
+library(dplyr)
+library(tidyr)
 ```
+
 
 ## Import JHU SSE data on GitHub into R
 
@@ -120,7 +123,6 @@ chn_map %>%
   count(NAME) %>% 
   print(n = Inf)
 ```
-
 
 `ggplot2` can plot SF data using `geom_sf` function:
 ```{r}
@@ -248,7 +250,7 @@ Plot confirmed cases on a specific date:
 ```{r}
 library(wesanderson)
 
-plotdate <- "2020-02-17"
+plotdate <- "2020-02-14"
 case <- "confirmed"
 
 ncov_tbl %>%
@@ -287,6 +289,7 @@ ncov_tbl %>%
   labs(y = "Count") + 
   theme_bw()
 ```
+
 ```{r}
 date <- "2020-02-18"
 ncov_tbl %>%
@@ -321,8 +324,7 @@ us_map <- ggplot(data = us_states,
                           group = group))
 us_map + geom_polygon(fill = "white", color = "black")
 ```
-
-#Tidy data for US, sliced last column for total amount of cases
+#Tidy data for US
 ```{r}
 us_confirmed <- confirmed %>%
   filter(`Country/Region` %in% c("US")) %>%
@@ -330,9 +332,41 @@ us_confirmed <- confirmed %>%
     names_to = "Date", values_to = "confirmed") %>%
   mutate(Date = (ymd(Date)))  %>%
   group_by(`Province/State`) %>%
-  slice(n())
+  slice(n()) 
 us_confirmed
 ```
+#Tidy data for CA, sliced last column for total amount of cases
+```{r}
+ca_confirmed <- confirmed %>%
+  filter(`Country/Region` %in% c("US")) %>%
+  pivot_longer(-(`Province/State`:Long), 
+    names_to = "Date", values_to = "confirmed") %>%
+  mutate(Date = (ymd(Date)))  %>%
+  group_by(`Province/State`) %>%
+  slice(n()) %>%
+  filter(grepl("CA", `Province/State`))
+ca_confirmed
+```
+
+
+```{r}
+library("ggplot2")
+library("ggmap")
+library("maps")
+library("mapdata")
+```
+#Confirmed cases in CA
+```{r}
+map("state", regions = "california") 
+```
+
+```{r}
+counties <- map_data("county")
+ca_county <- subset(counties, region == "california")
+print(counties)
+```
+
+
 ```{r}
 install.packages("cartography")
 ```

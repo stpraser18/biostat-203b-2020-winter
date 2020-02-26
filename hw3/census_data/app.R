@@ -15,8 +15,7 @@ ui <- fluidPage(
   
   sidebarLayout(
     sidebarPanel(
-      helpText("Create demographic maps with 
-               information from the 2010 US Census."),
+      helpText("Track the coronavirus over time in the US and China"),
       
       selectInput("var", 
                   label = "Choose a variable to display",

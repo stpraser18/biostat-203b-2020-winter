@@ -11,7 +11,7 @@ counties <- readRDS("data/counties.rds")
 
 # User interface ----
 ui <- fluidPage(
-  titlePanel("censusVis"),
+  titlePanel("Coronavirus Outbreak"),
   
   sidebarLayout(
     sidebarPanel(
@@ -20,13 +20,18 @@ ui <- fluidPage(
       
       selectInput("var", 
                   label = "Choose a variable to display",
-                  choices = c("Percent White", "Percent Black",
-                              "Percent Hispanic", "Percent Asian"),
-                  selected = "Percent White"),
+                  choices = c("United States", "China"),
+                  selected = "United States"),
+    
       
-      sliderInput("range", 
-                  label = "Range of interest:",
-                  min = 0, max = 100, value = c(0, 100))
+      dateRangeInput("range", 
+                     label = "Range of Interest:",
+                     start = "2019-12-01", 
+                     end = "2021-12-31", 
+                     min = "2019-12-01", 
+                     max = "2021-12-31", 
+                     format = "mm/dd/yy",
+                     separator = " - ")
     ),
     
     mainPanel(plotOutput("map"))

@@ -344,10 +344,13 @@ ca_confirmed <- confirmed %>%
   mutate(Date = (ymd(Date)))  %>%
   group_by(`Province/State`) %>%
   slice(n()) %>%
-  filter(grepl("CA", `Province/State`))
+  filter(grepl("CA", `Province/State`)) %>%
+  select(Lat, Long, confirmed)
 ca_confirmed
 ```
-
+```{r}
+CAcounty <- map("county", "California", namesonly = TRUE, col = "blue")
+```
 
 ```{r}
 library("ggplot2")

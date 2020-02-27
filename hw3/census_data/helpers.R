@@ -13,6 +13,21 @@ percent_map <- function(var, color, legend.title, min = 0, max = 100) {
                              include.lowest = TRUE, ordered = TRUE))
   fills <- shades[percents]
   
+  library(sf)
+  chn_map <- st_read("./bou2_4p.shp", as_tibble = TRUE) %>%
+    mutate(NAME = iconv(NAME, from = "GBK"),
+           BOU2_4M_ = as.integer(BOU2_4M_),
+           BOU2_4M_ID = as.integer(BOU2_4M_ID)) %>%
+    mutate(NAME = str_replace_na(NAME, replacement = "澳门特别行政区")) %>%
+    print()
+  
+  library(ggplot2)
+  chn_map %>%
+    ggplot() + 
+    geom_sf(mapping = aes(geometry = geometry), color = "black", fill = "white") + 
+    #geom_sf_label(mapping = aes(label = NAME)) + 
+    theme_bw() # better for maps 
+  
   # plot choropleth map
   map("county", fill = TRUE, col = fills, 
       resolution = 0, lty = 0, projection = "polyconic", 

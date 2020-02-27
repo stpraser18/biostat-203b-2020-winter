@@ -18,7 +18,7 @@ ui <- fluidPage(
       helpText("Track the coronavirus over time in the US and China"),
       
       selectInput("var", 
-                  label = "Choose a variable to display",
+                  label = "Choose a country to display",
                   choices = c("United States", "China"),
                   selected = "United States"),
     

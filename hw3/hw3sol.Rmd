@@ -283,7 +283,7 @@ us_corona <- confirmed_long %>%
   pivot_longer(confirmed:death, 
                names_to = "Case", 
                values_to = "Count")
-ncov_tbl %>% print(width = Inf)
+us_corona %>% print(width = Inf)
 ```
 
 #Try to plot the US map with coronavirus

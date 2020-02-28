@@ -17,6 +17,8 @@ knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
 library(tidyverse)
 library(lubridate)
 library(fs)
+library(leaflet)
+library(mapdata)
 ```
 
 
@@ -208,8 +210,7 @@ chn_prov <- chn_map %>%
 chn_prov %>% print(n = Inf)
 ```
 
-## Plotting 2019-nCoV incidence
-
+# Plotting 2019-nCoV incidence
 Try to join the virus data `ncov_tbl` and map data `chn_prov`.
 ```{r}
 # for exploration
@@ -250,21 +251,57 @@ ncov_tbl %>%
   theme_bw() +
   labs(title = str_c(case, " cases"), subtitle = plotdate)
 ```
-#Obtaining US Map
-```{r}
-us_states <- map_data("state")
+#Obtaining US Map (DOES NOT WORK)
+#```{r}
+us_states <- map_data("state") %>%
+  select(long, lat, region) %>%
+  distinct(region)
 head(us_states)
 ```
 
-#Outlining US Map
 ```{r}
-us_map <- ggplot(data = us_states,
+states <- map_data("state")
+dim(states)
+```
+
+
+#US Map
+```{r}
+us_states <- ggplot(data = us_states,
             mapping = aes(x = long, y = lat,
                           group = group))
-us_map + geom_polygon(fill = "white", color = "black")
+us_states + geom_polygon(fill = "white", color = "black")
 ```
-#Tidy data for US
 
+#Tidy Data for the US
+```{r}
+us_corona <- confirmed_long %>%
+  left_join(recovered_long) %>%
+  left_join(death_long) %>%
+  pivot_longer(confirmed:death, 
+               names_to = "Case", 
+               values_to = "Count") 
+us_corona %>% print(width = Inf)
+```
+
+#Plotting Coronavirus_US incident
+Joining coronavirus with the us map
+```{r}
+# for exploration
+plotdate <- "2020-02-14"
+case <- "confirmed"
+
+long_latus <- us_corona %>%
+  filter(`Province/State` %in% c("US")) %>%
+  filter(Date == plotdate, Case == case) %>%
+  group_by(`Province/State`) %>%  
+  top_n(1, Date) %>%
+  right_join(us_states, by = c("long" = "Long")) # join map and virus data
+long_latus
+```
+
+
+#Tidy data for US
 #```{r}
 us_confirmed <- confirmed %>%
   filter(`Country/Region` %in% c("US")) %>%
@@ -275,28 +312,7 @@ us_confirmed <- confirmed %>%
   slice(n()) 
 us_confirmed
 ```
-#Tidy data for the US
-```{r}
-us_corona <- confirmed_long %>%
-  left_join(recovered_long) %>%
-  left_join(death_long) %>%
-  pivot_longer(confirmed:death, 
-               names_to = "Case", 
-               values_to = "Count")
-us_corona %>% print(width = Inf)
-```
 
-#Try to plot the US map with coronavirus
-```{r}
-plotdate <- "2020-02-14"
-case <- "confirmed"
-us_map %>%
-  filter(`Province/State` %in% c("Boston,MA", "Chicago, IL", "Humboldt County, CA", "Los Angeles, CA")) %>%
-  filter(Date == plotdate, Case == case) %>%
-  group_by(`Province/State`) %>%  
-  top_n(1, Date) %>%
-  right_join(chn_prov, by = "Province/State") 
-```
 
 To plot the line graph of confirmed cases over time. You can do an animization of this over time.
 ```{r}
@@ -326,7 +342,6 @@ ncov_tbl %>%
   labs(title = date) + 
   theme(axis.text.x = element_text(angle = 90))
 ```
-
 
 
 ## Animation

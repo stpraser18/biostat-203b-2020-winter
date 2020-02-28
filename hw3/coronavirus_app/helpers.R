@@ -1,14 +1,3 @@
-library(sf)
-library(ggplot2)
-library(wesanderson)
-library(tidyverse)
-library(lubridate)
-library(dplyr)
-library(tidyr)
-library(fs)
-library(mapdata)
-
- 
 china_map <- function(plotdate) {   
   ncov_tbl %>%
     filter(`Country/Region` %in% c("Mainland China", "Macau", "Hong Kong", "Taiwan")) %>%
@@ -24,11 +13,11 @@ china_map <- function(plotdate) {
     #                     limits = c(1, 50000),
     #                     breaks = c(1, 10, 100, 1000, 10000),
     #                     name = "") +
-    scale_fill_gradientn(colors = wes_palette("Zissou1", 100, type = "continuous"),
+    scale_fill_gradientn(colors = wes_palette("GrandBudapest1", 100, type = "continuous"),
                          trans = "log10") + # can we find a better palette?
     # #scale_fill_brewer(palette = "Dark2") + 
     theme_bw() +
-    labs(title = str_c(case, " cases"), subtitle = plotdate)
+    labs(title = str_c("confirmed cases"), subtitle = plotdate)
 }
   
 

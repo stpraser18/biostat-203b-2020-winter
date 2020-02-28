@@ -12,24 +12,6 @@ output:
 knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
 ```
 
-## Task
-
-1. Develop a Shiny app that visualizes the progression of the 2019-20 Global Coronavirus Outbreak. 
-
-2. If you are ambitious, bring in visualization of other types of data, e.g., stock market, tweets, contrast with previous outbreak (e.g., 2003 SARS, 2009 H1N1, 2012 MERS, 2014 Ebola), prediction from your statistical/epidemiological model, and so on. 
-
-3. Publish your Shiny app to <https://www.shinyapps.io> and share the link.
-
-4. (Optinal) Submit your app to the 2020 Shiny Contest (deadline 20 March 2020 at 5pm ET). 
-
-Below is some data exploration, which may help you get started. You do _not_ have to use it. Note below code may change frequently.
-
-<!-- Johns Hopkins CSSE Visualization: <https://gisanddata.maps.arcgis.com/apps/opsdashboard/index.html#/bda7594740fd40299423467b48e9ecf6> -->
-
-<!-- Downloadable Google sheet: -->
-<!-- <https://docs.google.com/spreadsheets/d/1wQVypefm946ch4XDp37uZ-wartW4V7ILdg-qYiDXUHM/edit#gid=787605648> -->
-
-<!-- Time series table: <https://docs.google.com/spreadsheets/d/1UF2pSkFTURko2OvfHWWlFpDFAr1UxCBA4JLwlSP6KFo/edit#gid=0> -->
 
 ```{r include=FALSE}
 library(tidyverse)
@@ -37,33 +19,6 @@ library(lubridate)
 library(fs)
 ```
 
-## Import JHU Google Sheets into R - **EXPIRED on Feb 11**
-
-**Since Feb 11, JHU CSSE stops posting data on Google Sheets.**
-
-Johns Hopkins University (JHU) Center for Systems Science and Engineering (CSSE) kindly compiles, updates, and shares the current data on 2019-nCoV outbreak at Google Sheets: <https://docs.google.com/spreadsheets/d/1UF2pSkFTURko2OvfHWWlFpDFAr1UxCBA4JLwlSP6KFo>.
-
-We can use the tidyverse package [`googlesheets4`](https://googlesheets4.tidyverse.org) to import data from Google Sheets. Because the JHU sheets are public, we don't need authentication by tokens.
-```{r, eval = FALSE}
-library(googlesheets4)
-# no authentication
-sheets_deauth()
-```
-Import the `confirmed` sheet:
-```{r, eval = FALSE}
-(confirmed <- 
-   read_sheet("1UF2pSkFTURko2OvfHWWlFpDFAr1UxCBA4JLwlSP6KFo", sheet = 2))
-```
-Import the `recovered` sheet:
-```{r, eval = FALSE}
-(recovered <- 
-   read_sheet("1UF2pSkFTURko2OvfHWWlFpDFAr1UxCBA4JLwlSP6KFo", sheet = 3))
-```
-Import the `death` sheet:
-```{r, eval = FALSE}
-(death <- 
-   read_sheet("1UF2pSkFTURko2OvfHWWlFpDFAr1UxCBA4JLwlSP6KFo", sheet = 4))
-```
 
 ## Import JHU SSE data on GitHub into R
 
@@ -87,6 +42,7 @@ confirmed_long <- confirmed %>%
   mutate(Date = (mdy(Date))) # convert string to date-time
 confirmed_long
 ```
+
 ```{r}
 recovered_long <- recovered %>%
   pivot_longer(-(`Province/State`:Long), 
@@ -95,6 +51,7 @@ recovered_long <- recovered %>%
   mutate(Date = mdy(Date))
 recovered_long
 ```
+
 ```{r}
 death_long <- death %>%
   pivot_longer(-(`Province/State`:Long), 
@@ -121,44 +78,6 @@ Other sources of data:
 - R package `nCov2019`; install by `remotes::install_github("GuangchuangYu/nCov2019")`   
 - Shiny app [`coronavirus`](https://github.com/JohnCoene/coronavirus)   
 
-## Mapping China provinces
-
-Some useful resources for mapping:  
-- The book [_Geocomputation with R_](https://geocompr.robinlovelace.net). Especially [Chapter 8 Making Maps with R](https://geocompr.robinlovelace.net/adv-map.html).  
-- The book [_An Introduction to Spatial Analysis and Mapping in R_](https://bookdown.org/lexcomber/brunsdoncomber2e/). 
-
-### Use mapdata - **MAP IS TOO OLD**
-
-The package `mapdata` contains a data `china`. But the map seems out-dated. For example, Chongqing is sill a part of Sichuan province in this map.
-```{r}
-suppressMessages(library(mapdata))
-map("china", col = "gray40", ylim = c(18,54))
-```
-
-### Use GADM data - **THIS IS VERY SLOW**
-
-Download GADM data for China at <https://www.gadm.org/download_country_v3.html>. There are 4 levels of details to plot. We opt for the level 1 which is at the province level.
-```{r, eval = FALSE}
-library(sf)
-library(tidyverse)
-gadm36_CHN_1_sf <- readRDS("gadm36_CHN_0_sf.rds")
-ggplot(data = gadm36_CHN_1_sf) + 
-  geom_sf()
-```
-
-```{r, eval = FALSE}
-library("GADMTools")
-map <- gadm_sp_loadCountries("CHN", level = 1, basefile = "./")
-gadm_plot(map) + theme_light()
-```
-
-### Use shapefile from GADM - **THIS IS VERY SLOW**
-
-```{r, eval = FALSE}
-library(maptools)
-map <- rgdal::readOGR("gadm36_CHN_shp/gadm36_CHN_1.shp")
-plot(map)
-```
 
 ### Use GIS data from China
 
@@ -184,7 +103,6 @@ chn_map %>%
   count(NAME) %>% 
   print(n = Inf)
 ```
-
 
 `ggplot2` can plot SF data using `geom_sf` function:
 ```{r}
@@ -326,13 +244,59 @@ ncov_tbl %>%
   #                     limits = c(1, 50000),
   #                     breaks = c(1, 10, 100, 1000, 10000),
   #                     name = "") +
-  scale_fill_gradientn(colors = wes_palette("Zissou1", 100, type = "continuous"),
+  scale_fill_gradientn(colors = wes_palette("GrandBudapest1", 100, type = "continuous"),
                        trans = "log10") + # can we find a better palette?
   # #scale_fill_brewer(palette = "Dark2") + 
   theme_bw() +
   labs(title = str_c(case, " cases"), subtitle = plotdate)
 ```
+#Obtaining US Map
+```{r}
+us_states <- map_data("state")
+head(us_states)
+```
 
+#Outlining US Map
+```{r}
+us_map <- ggplot(data = us_states,
+            mapping = aes(x = long, y = lat,
+                          group = group))
+us_map + geom_polygon(fill = "white", color = "black")
+```
+#Tidy data for US
+
+#```{r}
+us_confirmed <- confirmed %>%
+  filter(`Country/Region` %in% c("US")) %>%
+  pivot_longer(-(`Province/State`:Long), 
+    names_to = "Date", values_to = "confirmed") %>%
+  mutate(Date = (ymd(Date)))  %>%
+  group_by(`Province/State`) %>%
+  slice(n()) 
+us_confirmed
+```
+#Tidy data for the US
+```{r}
+us_corona <- confirmed_long %>%
+  left_join(recovered_long) %>%
+  left_join(death_long) %>%
+  pivot_longer(confirmed:death, 
+               names_to = "Case", 
+               values_to = "Count")
+ncov_tbl %>% print(width = Inf)
+```
+
+#Try to plot the US map with coronavirus
+```{r}
+plotdate <- "2020-02-14"
+case <- "confirmed"
+us_map %>%
+  filter(`Province/State` %in% c("Boston,MA", "Chicago, IL", "Humboldt County, CA", "Los Angeles, CA")) %>%
+  filter(Date == plotdate, Case == case) %>%
+  group_by(`Province/State`) %>%  
+  top_n(1, Date) %>%
+  right_join(chn_prov, by = "Province/State") 
+```
 
 To plot the line graph of confirmed cases over time. You can do an animization of this over time.
 ```{r}
@@ -362,6 +326,8 @@ ncov_tbl %>%
   labs(title = date) + 
   theme(axis.text.x = element_text(angle = 90))
 ```
+
+
 
 ## Animation
 

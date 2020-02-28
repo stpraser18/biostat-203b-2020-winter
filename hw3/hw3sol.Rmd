@@ -216,6 +216,7 @@ Try to join the virus data `ncov_tbl` and map data `chn_prov`.
 # for exploration
 plotdate <- "2020-02-14"
 case <- "confirmed"
+
 ncov_tbl %>%
   filter(`Country/Region` %in% c("Mainland China", "Macau", "Hong Kong", "Taiwan")) %>%
   filter(Date == plotdate, Case == case) %>%
@@ -251,26 +252,25 @@ ncov_tbl %>%
   theme_bw() +
   labs(title = str_c(case, " cases"), subtitle = plotdate)
 ```
-#Obtaining US Map (DOES NOT WORK)
-#```{r}
-us_states <- map_data("state") %>%
-  select(long, lat, region) %>%
-  distinct(region)
-head(us_states)
-```
-
+#Try to obtain US
 ```{r}
 states <- map_data("state")
 dim(states)
 ```
-
+```{r}
+usa <- map_data("usa") # we already did this, but we can do it again
+ggplot() + 
+  geom_polygon(data = usa, aes(x = long, y = lat, group = group), fill = "white", color = "black")
+  ggplot(data = states) + 
+  geom_polygon(aes(x = long, y = lat, group = group), color = "white") 
+```
 
 #US Map
 ```{r}
-us_states <- ggplot(data = us_states,
+us_map <- ggplot(data = us_states,
             mapping = aes(x = long, y = lat,
                           group = group))
-us_states + geom_polygon(fill = "white", color = "black")
+us_map + geom_polygon(fill = "white", color = "black")
 ```
 
 #Tidy Data for the US
@@ -280,8 +280,15 @@ us_corona <- confirmed_long %>%
   left_join(death_long) %>%
   pivot_longer(confirmed:death, 
                names_to = "Case", 
-               values_to = "Count") 
+               values_to = "Count")
 us_corona %>% print(width = Inf)
+```
+#Plot confirmed by date
+```{r}
+us_distinct <- us_corona %>% 
+  group_by(`Province/State`) %>%
+  filter(grepl("confirmed", Case))
+us_distinct
 ```
 
 #Plotting Coronavirus_US incident

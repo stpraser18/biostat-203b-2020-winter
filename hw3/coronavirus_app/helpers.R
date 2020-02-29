@@ -19,6 +19,7 @@ china_map <- function(plotdate) {
     theme_bw() +
     labs(title = str_c("confirmed cases"), subtitle = plotdate)
 }
+
   
 
 

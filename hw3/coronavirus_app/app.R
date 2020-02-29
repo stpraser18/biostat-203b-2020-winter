@@ -163,7 +163,7 @@ server <- function(input, output) {
   output$map <- renderPlot({
     
     china_map(input$plotdate)
-    
+   
   })
 }
 

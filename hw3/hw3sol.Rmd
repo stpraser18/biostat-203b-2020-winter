@@ -1,5 +1,6 @@
 ---
 title: "Biostat 203B Homework 3"
+author: Supasara Prasertphong UID:905226886
 subtitle: Due ~~Feb 21~~ Feb 28 @ 11:59PM
 output:
   # ioslides_presentation: default
@@ -21,6 +22,10 @@ library(leaflet)
 library(mapdata)
 ```
 
+```{r}
+install.packages('rsconnect')
+rsconnect::setAccountInfo(name='stpraser18', token='091E41B94C48482E9AC6F07E7664E418', secret='vXssHQM+fYJ65bN82UVe53dyghAmUJQIO0S/rDS3')
+```
 
 ## Import JHU SSE data on GitHub into R
 

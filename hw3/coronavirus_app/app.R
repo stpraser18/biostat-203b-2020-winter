@@ -144,7 +144,7 @@ ui <- fluidPage(
   
   sidebarLayout(
     sidebarPanel(
-      helpText("Track the coronavirus over time in the US and China"),
+      helpText("Track the coronavirus over time in China"),
       
       dateInput("plotdate",
                 label = "Date",

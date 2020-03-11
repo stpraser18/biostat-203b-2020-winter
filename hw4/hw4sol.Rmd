@@ -135,18 +135,18 @@ tbl(con, "transfers") %>%
   print() -> ccu_admissions
 ```
 
-Now we want to restrict to heart attack patients. To find all possible ICD-9 codes related to heart attack, we search for string `myocardial infarction` in the `long_title` of table `d_icd_diagnoses`:
+Restrict to patients with tuberculous. Found all possible ICD-9 codes related to tuberculous, we search for the string 'tuberculous' in the column long_title from the table d_icd_diagnoses:
 ```{r}
 tbl(con, "d_icd_diagnoses") %>%
-  filter(str_detect(tolower(long_title), "myocardial infarction")) %>%
-  print() -> mi_codes
+  filter(str_detect(tolower(long_title), "tuberculous")) %>%
+  print() -> tuberculous_codes
 ```
 
 `diagnoses_icd` table stores the diagnosis of each admission. We use `semi_join()` to keep the rows in `diagnoses_icd` that match the ICD-9 codes related to heart attack:
 ```{r}
 tbl(con, "diagnoses_icd") %>%
-  semi_join(mi_codes, by = "icd9_code") %>%
-  print() -> mi_admissions
+  semi_join(tuberculous_codes, by = "icd9_code") %>%
+  print() -> tuberculous_admissions
 ```
 
 MI may not be listed as the principal diagnosis; as explained in [the documentation for the `patients` table](https://mimic.physionet.org/mimictables/diagnoses_icd/), the `seq_num` field is a priority ranking for the diagnoses generated at the end of stay. In order to focus on patients for whom MI was central to their hospitalization, we will include records with MI in any of the first five diagnosis positions, according to the `seq_num` field. To avoid duplicate admissions, we use `group_by()` and `top_n()` to limit the query to the first MI diagnosis for each admission.

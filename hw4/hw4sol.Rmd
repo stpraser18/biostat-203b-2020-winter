@@ -84,6 +84,13 @@ diagnoses %>% print(width = Inf)
 icd9 <- tbl(con, "d_icd_diagnoses")
 icd9 %>% print(width = Inf)
 ```
+#Join tables for diagnoses and icd9codes for all patients
+```{r}
+diagnoses %>%
+  left_join(icd9, by = c("icd9_code")) %>%
+  select(subject_id, hadm_id, seq_num, icd9_code, short_title, long_title) %>%
+  print() -> subjects_diagnoses
+```
 
 ```{r}
 #This document shows how RMarkdown can be used to create a reproducible analysis using MIMIC-III (version 1.4). Let's calculate the median length of stay in the ICU and then include this value in our document.

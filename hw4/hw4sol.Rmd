@@ -301,9 +301,11 @@ study_admissions %>%
 ```
 
 
-
-
-
+Check to see if any of the drugs that the patients were taking also had HIV.
+```{r}
+tbl(con, "drgcodes") %>%
+  print() -> drgcodes
+```
 
 
 

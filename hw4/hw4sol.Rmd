@@ -120,21 +120,21 @@ tbl(con, "transfers") %>%
   print() -> ccu_admissions
 ```
 
-Restrict to patients with tuberculosis. Found all possible ICD-9 codes related to tuberculosis, we search for the string 'tuberculosis' in the column long_title from the table d_icd_diagnoses. There are 354 codes that deal with tuberculosis. 
+Restrict to patients with tuberculosis. Found all possible ICD-9 codes related to tuberculosis, we search for the string 'tuberculosis' in the column long_title from the table d_icd_diagnoses. There are 92 codes that deal with respiratory illnesses. 
 ```{r}
 tbl(con, "d_icd_diagnoses") %>%
   filter(str_detect(tolower(long_title), "respiratory")) %>%
   print() -> resp_codes
 ```
 
-`diagnoses_icd` table stores the diagnosis of each admission. We use `semi_join()` to keep the rows in `diagnoses_icd` that match the ICD-9 codes related to tuberculosis. There are 283 patients that are diagnosed with tuberculosis.
+`diagnoses_icd` table stores the diagnosis of each admission. We use `semi_join()` to keep the rows in `diagnoses_icd` that match the ICD-9 codes related to tuberculosis. There are 1000 patients that are diagnosed with respiratory illness.
 ```{r}
 tbl(con, "diagnoses_icd") %>%
   semi_join(resp_codes, by = "icd9_code") %>%
   print() -> resp_admissions
 ```
 
-The `seq_num` field is a priority ranking for the diagnoses generated at the end of stay. In order to focus on patients for whom tuberculosis was central to their hospitalization, we will include records with tuberculosis in any of the first five diagnosis positions, according to the `seq_num` field. To avoid duplicate admissions, we use `group_by()` and `top_n()` to limit the query to the first tuberculosis diagnosis for each admission. Now there are 82 patients that were admitted to hospitalization, with repeated subjects. 
+The `seq_num` field is a priority ranking for the diagnoses generated at the end of stay. In order to focus on patients for whom tuberculosis was central to their hospitalization, we will include records with respiratory illness in any of the first five diagnosis positions, according to the `seq_num` field. To avoid duplicate admissions, we use `group_by()` and `top_n()` to limit the query to the first respiratory diagnosis for each admission. Now there are 1000 patients that were admitted to hospitalization, with repeated subjects. 
 ```{r}
 resp_admissions %>%
   filter(seq_num <= 5) %>%
@@ -145,7 +145,7 @@ resp_admissions %>%
   select(subject_id, hadm_id, icd9_code, seq_num) %>%
   print() -> resp_admissions
 ```
-Now we `inner_join` the table of admissions to CCU and the table of admissions that include tuberculosis diagnosis. Very few subjects, specifically 3, were admitted to the CCU were diagnosed with tuberculosis, but one patient was primarily admitted with tuberculosis with a seq_num = 1. 
+Now we `inner_join` the table of admissions to CCU and the table of admissions that include tuberculosis diagnosis.
 ```{r}
 ccu_admissions %>%
   inner_join(resp_admissions, by = c("subject_id", "hadm_id")) %>%
@@ -154,7 +154,7 @@ ccu_admissions %>%
 
 ## Transform and augment query tables
 
-Created a logical variable indicating if tuberculous is the principal diagonosis or not, whether the seq_num is 1 then it is the principal diagnosis. Only 1 patient fell under this variable.
+Created a logical variable indicating if tuberculous is the principal diagonosis or not, whether the seq_num is 1 then it is the principal diagnosis. 
 
 ```{r}
 study_admissions %>%
@@ -163,7 +163,7 @@ study_admissions %>%
   print() -> study_admissions
 ```
 
-We want to add information about the severity of patients’ ailments. The `drgcodes` table contains, for `DRG` codes from the All Payers Registry (APR), severity and mortality indicators. We pull the drug severity information and right-join it to our query table. There are 3 patients that are on drugs and the patient that was hospitalized had a drug severity of 4.
+We want to add information about the severity of patients’ ailments. The `drgcodes` table contains, for `DRG` codes from the All Payers Registry (APR), severity and mortality indicators. We pull the drug severity information and right-join it to our query table. 
 ```{r}
 tbl(con, "drgcodes") %>%
   filter(str_detect(drg_type, "APR")) %>%
@@ -210,6 +210,14 @@ study_admissions %>%
   print() -> study_admissions
 ```
 Many mortality indicators are missing, due to neither the hospital database nor the social security database having a record of these patients’ deaths. We could convert these to `FALSE` values, but it may be helpful to retain in the analytic table this information on whether deaths were recorded at all, e.g. for validation or sensitivity testing.
+
+Let's try to select the patients that have a 30 day mortality rate that were admitted to the CCU primarily from respiratory illness. 
+```{r}
+study_admissions %>%
+  group_by(subject_id) %>%
+  filter(seq_num == 1) %>%
+print() -> study_1
+```
 
 Finally, let's merge some demographic information (ethnicity, gender) into our study `study_admissions`.
 ```{r}

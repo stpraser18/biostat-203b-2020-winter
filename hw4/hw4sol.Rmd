@@ -1,6 +1,6 @@
 ---
 title: "Biostat 203B Homework 4 Solution"
-author: Supasara Prasertphong (UID: 905226886)
+author: Supasara Prasertphong (UID:905226886)
 subtitle: Due Mar 20 @ 11:59PM
 output:
   # ioslides_presentation: default
@@ -41,12 +41,14 @@ In this assignment, you are to write a report analyzing the electronic health re
 
 ## Connect to PostgresSQL database
 
+
 Load database libraries and the tidyverse frontend:
 ```{r}
 library(DBI)
 library(RPostgreSQL)
 library(tidyverse)
 library(lubridate)
+library(dplyr)
 ```
 
 Credentials for using PostgreSQL database. We are going to use username `postgres` with password `postgres` to access the `mimic` database in the schemee `mimiciii`. 
@@ -74,35 +76,18 @@ List tables in the `mimic` database:
 ```{r}
 dbListTables(con)
 ```
-#Printing of diagnoses for patients
+An example SQL query:
 ```{r}
-diagnoses <- tbl(con, "diagnoses_icd")
-diagnoses %>% print(width = Inf)
+sql_query <- "SELECT i.subject_id, i.hadm_id, i.los
+              FROM icustays i;"
+(data <- dbGetQuery(con, sql_query)) %>% as_tibble()
 ```
-#Printing icd9_codes
-```{r}
-icd9 <- tbl(con, "d_icd_diagnoses")
-icd9 %>% print(width = Inf)
-```
-#Join tables for diagnoses and icd9codes for all patients
-```{r}
-diagnoses %>%
-  left_join(icd9, by = c("icd9_code")) %>%
-  select(subject_id, hadm_id, seq_num, icd9_code, short_title, long_title) %>%
-  print() -> subjects_diagnoses
-```
-
 ```{r}
 #This document shows how RMarkdown can be used to create a reproducible analysis using MIMIC-III (version 1.4). Let's calculate the median length of stay in the ICU and then include this value in our document.
 (avg_los <- median(data$los, na.rm=TRUE))
 (rounded_avg_los <- round(avg_los, digits = 2))
 ```
 
-```{r}
-sql_query <- "SELECT i.subject_id, i.hadm_id, i.los
-              FROM icustays i;"
-(data <- dbGetQuery(con, sql_query)) %>% as_tibble()
-```
 
 ## Connect to a table in database
 
@@ -123,7 +108,7 @@ But keep in mind that the point of using a database software is that the data ta
 
 ## Query and subsetting
 
-In this section, we demo how to create a cohort of patients who were directly admitted into CCU and were diagnosed with heart attack.
+In this section, we demo how to create a cohort of patients who were directly admitted into CCU and were diagnosed with tuberculosis.
 
 First we create a (query) table of patients who were directly admitted into CCU.
 ```{r}
@@ -135,41 +120,41 @@ tbl(con, "transfers") %>%
   print() -> ccu_admissions
 ```
 
-Restrict to patients with tuberculous. Found all possible ICD-9 codes related to tuberculosis, we search for the string 'tuberculosis' in the column long_title from the table d_icd_diagnoses:
+Restrict to patients with tuberculosis. Found all possible ICD-9 codes related to tuberculosis, we search for the string 'tuberculosis' in the column long_title from the table d_icd_diagnoses. There are 354 codes that deal with tuberculosis. 
 ```{r}
 tbl(con, "d_icd_diagnoses") %>%
-  filter(str_detect(tolower(long_title), "tuberculosis")) %>%
-  print() -> tb_codes
+  filter(str_detect(tolower(long_title), "respiratory")) %>%
+  print() -> resp_codes
 ```
 
-`diagnoses_icd` table stores the diagnosis of each admission. We use `semi_join()` to keep the rows in `diagnoses_icd` that match the ICD-9 codes related to tuberculosis:
+`diagnoses_icd` table stores the diagnosis of each admission. We use `semi_join()` to keep the rows in `diagnoses_icd` that match the ICD-9 codes related to tuberculosis. There are 283 patients that are diagnosed with tuberculosis.
 ```{r}
 tbl(con, "diagnoses_icd") %>%
-  semi_join(tb_codes, by = "icd9_code") %>%
-  print() -> tb_admissions
+  semi_join(resp_codes, by = "icd9_code") %>%
+  print() -> resp_admissions
 ```
 
-MI may not be listed as the principal diagnosis; as explained in [the documentation for the `patients` table](https://mimic.physionet.org/mimictables/diagnoses_icd/), the `seq_num` field is a priority ranking for the diagnoses generated at the end of stay. In order to focus on patients for whom MI was central to their hospitalization, we will include records with MI in any of the first five diagnosis positions, according to the `seq_num` field. To avoid duplicate admissions, we use `group_by()` and `top_n()` to limit the query to the first MI diagnosis for each admission.
+The `seq_num` field is a priority ranking for the diagnoses generated at the end of stay. In order to focus on patients for whom tuberculosis was central to their hospitalization, we will include records with tuberculosis in any of the first five diagnosis positions, according to the `seq_num` field. To avoid duplicate admissions, we use `group_by()` and `top_n()` to limit the query to the first tuberculosis diagnosis for each admission. Now there are 82 patients that were admitted to hospitalization, with repeated subjects. 
 ```{r}
-tb_admissions %>%
+resp_admissions %>%
   filter(seq_num <= 5) %>%
   group_by(subject_id, hadm_id) %>%
-  # top_n(1, wt = seq_num) %>% #  not working. bug? use following as workaround
+  #top_n(1, wt = seq_num) %>% #  not working. bug? use following as workaround
   filter(min_rank(seq_num) <= 1) %>%
   ungroup() %>%
   select(subject_id, hadm_id, icd9_code, seq_num) %>%
-  print() -> tb_admissions
+  print() -> resp_admissions
 ```
-Now we `inner_join` the table of admissions to CCU and the table of admissions that include tuberculosis diagnosis. Very few subjects were admitted to the CCU were diagnosed with tuberculosis.
+Now we `inner_join` the table of admissions to CCU and the table of admissions that include tuberculosis diagnosis. Very few subjects, specifically 3, were admitted to the CCU were diagnosed with tuberculosis, but one patient was primarily admitted with tuberculosis with a seq_num = 1. 
 ```{r}
 ccu_admissions %>%
-  inner_join(tb_admissions, by = c("subject_id", "hadm_id")) %>%
+  inner_join(resp_admissions, by = c("subject_id", "hadm_id")) %>%
   print() -> study_admissions
 ```
 
 ## Transform and augment query tables
 
-Created a logical variable indicating if tuberculous is the principal diagonosis or not, whether the seq_num is 1 then it is the principal diagnosis.
+Created a logical variable indicating if tuberculous is the principal diagonosis or not, whether the seq_num is 1 then it is the principal diagnosis. Only 1 patient fell under this variable.
 
 ```{r}
 study_admissions %>%
@@ -178,7 +163,7 @@ study_admissions %>%
   print() -> study_admissions
 ```
 
-We want to add information about the severity of patients’ ailments. The `drgcodes` table contains, for `DRG` codes from the All Payers Registry (APR), severity and mortality indicators. We pull the drug severity information and right-join it to our query table.
+We want to add information about the severity of patients’ ailments. The `drgcodes` table contains, for `DRG` codes from the All Payers Registry (APR), severity and mortality indicators. We pull the drug severity information and right-join it to our query table. There are 3 patients that are on drugs and the patient that was hospitalized had a drug severity of 4.
 ```{r}
 tbl(con, "drgcodes") %>%
   filter(str_detect(drg_type, "APR")) %>%
@@ -211,7 +196,6 @@ study_admissions %>%
   mutate(tt_death = date_part("day", dod) - date_part("day", dischtime)) %>%
   mutate(mortality = tt_death <= 30) %>%
   mutate(age = date_part("year", admittime) - date_part("year", dob)) %>%
-  #filter(age < 90) %>%
   mutate(age = age - ifelse(
     date_part("month", admittime) < date_part("month", dob) |
       (
@@ -306,8 +290,6 @@ Check to see if any of the drugs that the patients were taking also had HIV.
 tbl(con, "drgcodes") %>%
   print() -> drgcodes
 ```
-
-
 
 
 

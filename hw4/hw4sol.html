@@ -9,6 +9,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
+<meta name="author" content="Supasara Prasertphong (UID:905226886)" />
 
 
 <title>Biostat 203B Homework 4 Solution</title>
@@ -363,6 +364,7 @@ summary {
 
 <h1 class="title toc-ignore">Biostat 203B Homework 4 Solution</h1>
 <h3 class="subtitle">Due Mar 20 @ 11:59PM</h3>
+<h4 class="author">Supasara Prasertphong (UID:905226886)</h4>
 
 </div>
 
@@ -424,6 +426,7 @@ library(tidyverse)</code></pre>
 <pre><code>## The following object is masked from 'package:base':
 ## 
 ##     date</code></pre>
+<pre class="r"><code>library(dplyr)</code></pre>
 <p>Credentials for using PostgreSQL database. We are going to use username <code>postgres</code> with password <code>postgres</code> to access the <code>mimic</code> database in the schemee <code>mimiciii</code>.</p>
 <pre class="r"><code># Load configuration settings
 dbdriver &lt;- 'PostgreSQL'
@@ -524,9 +527,11 @@ dbExecute(con, paste(&quot;SET search_path TO &quot;, schema, sep=&quot; &quot;)
 ## [223] &quot;d_icd_diagnoses&quot;    &quot;d_icd_procedures&quot;   &quot;d_items&quot;           
 ## [226] &quot;d_labitems&quot;         &quot;icustays&quot;           &quot;inputevents_cv&quot;    
 ## [229] &quot;prescriptions&quot;      &quot;procedureevents_mv&quot; &quot;procedures_icd&quot;    
-## [232] &quot;services&quot;           &quot;transfers&quot;          &quot;dbplyr_073&quot;        
-## [235] &quot;dbplyr_235&quot;         &quot;dbplyr_412&quot;         &quot;dbplyr_511&quot;        
-## [238] &quot;dbplyr_603&quot;</code></pre>
+## [232] &quot;services&quot;           &quot;transfers&quot;          &quot;dbplyr_252&quot;        
+## [235] &quot;dbplyr_260&quot;         &quot;dbplyr_277&quot;         &quot;dbplyr_289&quot;        
+## [238] &quot;dbplyr_216&quot;         &quot;dbplyr_218&quot;         &quot;dbplyr_220&quot;        
+## [241] &quot;dbplyr_223&quot;         &quot;dbplyr_224&quot;         &quot;dbplyr_226&quot;        
+## [244] &quot;dbplyr_244&quot;         &quot;dbplyr_291&quot;         &quot;dbplyr_303&quot;</code></pre>
 <p>An example SQL query:</p>
 <pre class="r"><code>sql_query &lt;- &quot;SELECT i.subject_id, i.hadm_id, i.los
               FROM icustays i;&quot;
@@ -588,7 +593,7 @@ patients %&gt;% print(width = Inf)</code></pre>
 <pre><code>## List of 2
 ##  $ src:List of 2
 ##   ..$ con  :Formal class 'PostgreSQLConnection' [package &quot;RPostgreSQL&quot;] with 1 slot
-##   .. .. ..@ Id: int [1:2] 28032 0
+##   .. .. ..@ Id: int [1:2] 19639 0
 ##   ..$ disco: NULL
 ##   ..- attr(*, &quot;class&quot;)= chr [1:4] &quot;src_PostgreSQLConnection&quot; &quot;src_dbi&quot; &quot;src_sql&quot; &quot;src&quot;
 ##  $ ops:List of 2
@@ -640,7 +645,7 @@ patients %&gt;% print(width = Inf)</code></pre>
 ##  9      12138  131429
 ## 10      10616  122738
 ## # … with more rows</code></pre>
-<p>Restrict to patients with tuberculous. Found all possible ICD-9 codes related to tuberculosis, we search for the string ‘tuberculosis’ in the column long_title from the table d_icd_diagnoses:</p>
+<p>Restrict to patients with tuberculosis. Found all possible ICD-9 codes related to tuberculosis, we search for the string ‘tuberculosis’ in the column long_title from the table d_icd_diagnoses. There are 354 codes that deal with tuberculosis.</p>
 <pre class="r"><code>tbl(con, &quot;d_icd_diagnoses&quot;) %&gt;%
   filter(str_detect(tolower(long_title), &quot;tuberculosis&quot;)) %&gt;%
   print() -&gt; tb_codes</code></pre>
@@ -659,7 +664,7 @@ patients %&gt;% print(width = Inf)</code></pre>
 ##  9    187 01185     Pulmon TB NEC-his… Other specified pulmonary tuberculosis, …
 ## 10    188 01186     Pulmon TB NEC-oth… Other specified pulmonary tuberculosis, …
 ## # … with more rows</code></pre>
-<p><code>diagnoses_icd</code> table stores the diagnosis of each admission. We use <code>semi_join()</code> to keep the rows in <code>diagnoses_icd</code> that match the ICD-9 codes related to tuberculosis:</p>
+<p><code>diagnoses_icd</code> table stores the diagnosis of each admission. We use <code>semi_join()</code> to keep the rows in <code>diagnoses_icd</code> that match the ICD-9 codes related to tuberculosis. There are 283 patients that are diagnosed with tuberculosis.</p>
 <pre class="r"><code>tbl(con, &quot;diagnoses_icd&quot;) %&gt;%
   semi_join(tb_codes, by = &quot;icd9_code&quot;) %&gt;%
   print() -&gt; tb_admissions</code></pre>
@@ -678,11 +683,11 @@ patients %&gt;% print(width = Inf)</code></pre>
 ##  9 604339      89840  186211       9 01190    
 ## 10 250889      22532  167853       1 01193    
 ## # … with more rows</code></pre>
-<p>MI may not be listed as the principal diagnosis; as explained in <a href="https://mimic.physionet.org/mimictables/diagnoses_icd/">the documentation for the <code>patients</code> table</a>, the <code>seq_num</code> field is a priority ranking for the diagnoses generated at the end of stay. In order to focus on patients for whom MI was central to their hospitalization, we will include records with MI in any of the first five diagnosis positions, according to the <code>seq_num</code> field. To avoid duplicate admissions, we use <code>group_by()</code> and <code>top_n()</code> to limit the query to the first MI diagnosis for each admission.</p>
+<p>The <code>seq_num</code> field is a priority ranking for the diagnoses generated at the end of stay. In order to focus on patients for whom tuberculosis was central to their hospitalization, we will include records with tuberculosis in any of the first five diagnosis positions, according to the <code>seq_num</code> field. To avoid duplicate admissions, we use <code>group_by()</code> and <code>top_n()</code> to limit the query to the first tuberculosis diagnosis for each admission. Now there are 82 patients that were admitted to hospitalization, with repeated subjects.</p>
 <pre class="r"><code>tb_admissions %&gt;%
   filter(seq_num &lt;= 5) %&gt;%
   group_by(subject_id, hadm_id) %&gt;%
-  # top_n(1, wt = seq_num) %&gt;% #  not working. bug? use following as workaround
+  #top_n(1, wt = seq_num) %&gt;% #  not working. bug? use following as workaround
   filter(min_rank(seq_num) &lt;= 1) %&gt;%
   ungroup() %&gt;%
   select(subject_id, hadm_id, icd9_code, seq_num) %&gt;%
@@ -708,7 +713,7 @@ patients %&gt;% print(width = Inf)</code></pre>
 ##  9       6317  122673 01803           1
 ## 10       6317  194396 01896           2
 ## # … with more rows</code></pre>
-<p>Now we <code>inner_join</code> the table of admissions to CCU and the table of admissions that include tuberculosis diagnosis. Very few subjects were admitted to the CCU were diagnosed with tuberculosis.</p>
+<p>Now we <code>inner_join</code> the table of admissions to CCU and the table of admissions that include tuberculosis diagnosis. Very few subjects, specifically 3, were admitted to the CCU were diagnosed with tuberculosis, but one patient was primarily admitted with tuberculosis with a seq_num = 1.</p>
 <pre class="r"><code>ccu_admissions %&gt;%
   inner_join(tb_admissions, by = c(&quot;subject_id&quot;, &quot;hadm_id&quot;)) %&gt;%
   print() -&gt; study_admissions</code></pre>
@@ -722,7 +727,7 @@ patients %&gt;% print(width = Inf)</code></pre>
 </div>
 <div id="transform-and-augment-query-tables" class="section level2">
 <h2>Transform and augment query tables</h2>
-<p>Created a logical variable indicating if tuberculous is the principal diagonosis or not, whether the seq_num is 1 then it is the principal diagnosis.</p>
+<p>Created a logical variable indicating if tuberculous is the principal diagonosis or not, whether the seq_num is 1 then it is the principal diagnosis. Only 1 patient fell under this variable.</p>
 <pre class="r"><code>study_admissions %&gt;%
   mutate(principal_dx = seq_num == 1) %&gt;%
   #select(-seq_num) %&gt;%
@@ -734,7 +739,7 @@ patients %&gt;% print(width = Inf)</code></pre>
 ## 1      32114  133499 01205           1 TRUE        
 ## 2      42327  176260 5111            2 FALSE       
 ## 3      69232  146606 V1201           3 FALSE</code></pre>
-<p>We want to add information about the severity of patients’ ailments. The <code>drgcodes</code> table contains, for <code>DRG</code> codes from the All Payers Registry (APR), severity and mortality indicators. We pull the drug severity information and right-join it to our query table.</p>
+<p>We want to add information about the severity of patients’ ailments. The <code>drgcodes</code> table contains, for <code>DRG</code> codes from the All Payers Registry (APR), severity and mortality indicators. We pull the drug severity information and right-join it to our query table. There are 3 patients that are on drugs and the patient that was hospitalized had a drug severity of 4.</p>
 <pre class="r"><code>tbl(con, &quot;drgcodes&quot;) %&gt;%
   filter(str_detect(drg_type, &quot;APR&quot;)) %&gt;%
   select(subject_id, hadm_id, drg_severity) %&gt;%
@@ -790,7 +795,6 @@ patients %&gt;% print(width = Inf)</code></pre>
   mutate(tt_death = date_part(&quot;day&quot;, dod) - date_part(&quot;day&quot;, dischtime)) %&gt;%
   mutate(mortality = tt_death &lt;= 30) %&gt;%
   mutate(age = date_part(&quot;year&quot;, admittime) - date_part(&quot;year&quot;, dob)) %&gt;%
-  #filter(age &lt; 90) %&gt;%
   mutate(age = age - ifelse(
     date_part(&quot;month&quot;, admittime) &lt; date_part(&quot;month&quot;, dob) |
       (

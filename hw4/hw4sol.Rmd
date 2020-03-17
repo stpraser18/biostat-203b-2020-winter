@@ -17,9 +17,9 @@ knitr::opts_chunk$set(echo = TRUE)
 
 In this assignment, you are to write a report analyzing the electronic health record (EHR) data MIMIC-III. You report will demostrate your knowledge of working with PostgreSQL database, data visualization, and commonly used analytical methods such as logistic regression and neural network. Your report should include at least following parts:  
 
-1. An informative title. _30-Day Mortality Rate of Tuberculous Patients Admitted to CCU_ 
+1. An informative title. _30-Day Mortality Rate of Respiratory Patients Admitted to CCU_ 
 
-2. Introduction. Describe the MIMIC-III data set and what research hypothesis/goal you are to address using this data. **Introduction:** I used the d_icd_diagnoses to obtain the patients who were diagnosed with tuberculous and diagnoses_icd to look up the code for the diagnoses. The table of admissions to CCU and table of admissions for the tuberculous diagnoses was used. Hypothesis: Patients who were diagnosed with tuberculous and admitted into the CCU have a high chance of dying within 30 days as it is one of the top 10 causes of death according to the World Health Organization.
+2. Introduction. Describe the MIMIC-III data set and what research hypothesis/goal you are to address using this data. **Introduction:** I used the d_icd_diagnoses to obtain the patients who were diagnosed with any respiratory illness and diagnoses_icd to look up the code for the diagnoses. The table of admissions to CCU and table of admissions for the respiratory diagnoses was used. Hypothesis: Patients who were diagnosed with any respiratory illness and admitted into the CCU have a high chance of dying within 30 days as it is one of the top 10 causes of death according to the World Health Organization.
 
 3. Data preparation. Create a study cohort from MIMIC-III corresponding to your research hypothesis/goal. See the examplary code below. Use a CONSORT flow diagram to summarize your steps to create the cohort.
 
@@ -134,7 +134,7 @@ tbl(con, "diagnoses_icd") %>%
   print() -> resp_admissions
 ```
 
-The `seq_num` field is a priority ranking for the diagnoses generated at the end of stay. In order to focus on patients for whom tuberculosis was central to their hospitalization, we will include records with respiratory illness in any of the first five diagnosis positions, according to the `seq_num` field. To avoid duplicate admissions, we use `group_by()` and `top_n()` to limit the query to the first respiratory diagnosis for each admission. Now there are 1000 patients that were admitted to hospitalization, with repeated subjects. 
+The `seq_num` field is a priority ranking for the diagnoses generated at the end of stay. In order to focus on patients for whom respiratory illness was central to their hospitalization, we will include records with respiratory illness in any of the first five diagnosis positions, according to the `seq_num` field. To avoid duplicate admissions, we use `group_by()` and `top_n()` to limit the query to the first respiratory diagnosis for each admission. Now there are 1000 patients that were admitted to hospitalization, with repeated subjects. 
 ```{r}
 resp_admissions %>%
   filter(seq_num <= 5) %>%
@@ -145,7 +145,7 @@ resp_admissions %>%
   select(subject_id, hadm_id, icd9_code, seq_num) %>%
   print() -> resp_admissions
 ```
-Now we `inner_join` the table of admissions to CCU and the table of admissions that include tuberculosis diagnosis.
+Now we `inner_join` the table of admissions to CCU and the table of admissions that include respiratory diagnosis.
 ```{r}
 ccu_admissions %>%
   inner_join(resp_admissions, by = c("subject_id", "hadm_id")) %>%
@@ -154,7 +154,7 @@ ccu_admissions %>%
 
 ## Transform and augment query tables
 
-Created a logical variable indicating if tuberculous is the principal diagonosis or not, whether the seq_num is 1 then it is the principal diagnosis. 
+Created a logical variable indicating if respiratory illness was the principal diagonosis or not, whether the seq_num is 1 then it is the principal diagnosis. 
 
 ```{r}
 study_admissions %>%
@@ -162,7 +162,14 @@ study_admissions %>%
   #select(-seq_num) %>%
   print() -> study_admissions
 ```
-
+Create graph based on the seq_num, dealing with the primary diagnoses of respiratory illness. 
+```{r}
+study_admissions %>% 
+  group_by(seq_num) %>%
+  summarize(count = n()) %>%
+  ggplot(aes(x = seq_num, y = count)) +
+  geom_col()
+```
 We want to add information about the severity of patients’ ailments. The `drgcodes` table contains, for `DRG` codes from the All Payers Registry (APR), severity and mortality indicators. We pull the drug severity information and right-join it to our query table. 
 ```{r}
 tbl(con, "drgcodes") %>%
@@ -173,7 +180,8 @@ tbl(con, "drgcodes") %>%
   print() -> study_admissions
 ```
 
-Pull the admission time `admittime`, discharge time `dischtime`, date of birth `dob`, and date of death `dod`. We are interested in the  mortaility rate 30 days after discharge. So we only keep patients who didn't die in hospital.
+Pull the admission time `admittime`, discharge time `dischtime`, date of birth `dob`, and date of death `dod`. We are interested in the mortality rate 30 days after discharge. So we only keep patients who didn't die in hospital.
+
 ```{r}
 study_admissions %>%
   left_join(
@@ -190,7 +198,7 @@ study_admissions %>%
   print(width = Inf) -> study_admissions
 ```
 
-Created a new column for the age of death and the mortality column is to see if the death is within 30 days of discharge. Subjects with tuberculosis, age, drug severity, etc...are included. 
+Created a new column for the age of death and the mortality column is to see if the death is within 30 days of discharge. Subjects with respiratory illness, age, drug severity, etc...are included. 
 ```{r}
 study_admissions %>%
   mutate(tt_death = date_part("day", dod) - date_part("day", dischtime)) %>%
@@ -211,13 +219,6 @@ study_admissions %>%
 ```
 Many mortality indicators are missing, due to neither the hospital database nor the social security database having a record of these patients’ deaths. We could convert these to `FALSE` values, but it may be helpful to retain in the analytic table this information on whether deaths were recorded at all, e.g. for validation or sensitivity testing.
 
-Let's try to select the patients that have a 30 day mortality rate that were admitted to the CCU primarily from respiratory illness. 
-```{r}
-study_admissions %>%
-  group_by(subject_id) %>%
-  filter(seq_num == 1) %>%
-print() -> study_1
-```
 
 Finally, let's merge some demographic information (ethnicity, gender) into our study `study_admissions`.
 ```{r}
@@ -292,14 +293,13 @@ study_admissions %>%
   print() -> study_admissions
 ```
 
-
-Check to see if any of the drugs that the patients were taking also had HIV.
+Let's try to select the patients that have a 30 day mortality rate that were admitted to the CCU primarily from respiratory illness. Some of the subjects are repeated with a total of 185 subjects diagnosed with respiratory illness, we have found that subjects have the icd9_code of 51881 which is acute respiratory failure.
 ```{r}
-tbl(con, "drgcodes") %>%
-  print() -> drgcodes
+study_admissions %>%
+  group_by(subject_id) %>%
+  filter(seq_num == 1) %>%
+print() -> study_1
 ```
-
-
 
 
 ## Close the connection to a database
@@ -374,6 +374,11 @@ for (i in 1:num_of_boxes) {
            lab = box_content[i], 
            shadow.col = "grey")
   }
+```
+
+```{r}
+library(keras)
+install_keras(tensorflow = "gpu")
 ```
 
 ## Install PostgreSQL and `RpostgreSQL` package on CentOS

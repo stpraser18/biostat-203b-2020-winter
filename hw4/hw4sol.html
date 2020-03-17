@@ -412,12 +412,12 @@ summary {
 <pre class="r"><code>library(DBI)
 library(RPostgreSQL)
 library(tidyverse)</code></pre>
-<pre><code>## ── Attaching packages ─────────────────────────────────────────────────────────────────────────── tidyverse 1.3.0 ──</code></pre>
+<pre><code>## ── Attaching packages ───────────────────────────────────────────────────────────────────── tidyverse 1.3.0 ──</code></pre>
 <pre><code>## ✓ ggplot2 3.2.1     ✓ purrr   0.3.3
 ## ✓ tibble  2.1.3     ✓ dplyr   0.8.4
 ## ✓ tidyr   1.0.2     ✓ stringr 1.4.0
 ## ✓ readr   1.3.1     ✓ forcats 0.4.0</code></pre>
-<pre><code>## ── Conflicts ────────────────────────────────────────────────────────────────────────────── tidyverse_conflicts() ──
+<pre><code>## ── Conflicts ──────────────────────────────────────────────────────────────────────── tidyverse_conflicts() ──
 ## x dplyr::filter() masks stats::filter()
 ## x dplyr::lag()    masks stats::lag()</code></pre>
 <pre class="r"><code>library(lubridate)</code></pre>
@@ -527,11 +527,10 @@ dbExecute(con, paste(&quot;SET search_path TO &quot;, schema, sep=&quot; &quot;)
 ## [223] &quot;d_icd_diagnoses&quot;    &quot;d_icd_procedures&quot;   &quot;d_items&quot;           
 ## [226] &quot;d_labitems&quot;         &quot;icustays&quot;           &quot;inputevents_cv&quot;    
 ## [229] &quot;prescriptions&quot;      &quot;procedureevents_mv&quot; &quot;procedures_icd&quot;    
-## [232] &quot;services&quot;           &quot;transfers&quot;          &quot;dbplyr_252&quot;        
-## [235] &quot;dbplyr_260&quot;         &quot;dbplyr_277&quot;         &quot;dbplyr_289&quot;        
-## [238] &quot;dbplyr_216&quot;         &quot;dbplyr_218&quot;         &quot;dbplyr_220&quot;        
-## [241] &quot;dbplyr_223&quot;         &quot;dbplyr_224&quot;         &quot;dbplyr_226&quot;        
-## [244] &quot;dbplyr_244&quot;         &quot;dbplyr_291&quot;         &quot;dbplyr_303&quot;</code></pre>
+## [232] &quot;services&quot;           &quot;transfers&quot;          &quot;dbplyr_115&quot;        
+## [235] &quot;dbplyr_185&quot;         &quot;dbplyr_228&quot;         &quot;dbplyr_006&quot;        
+## [238] &quot;dbplyr_014&quot;         &quot;dbplyr_036&quot;         &quot;dbplyr_109&quot;        
+## [241] &quot;dbplyr_136&quot;         &quot;dbplyr_177&quot;</code></pre>
 <p>An example SQL query:</p>
 <pre class="r"><code>sql_query &lt;- &quot;SELECT i.subject_id, i.hadm_id, i.los
               FROM icustays i;&quot;
@@ -593,7 +592,7 @@ patients %&gt;% print(width = Inf)</code></pre>
 <pre><code>## List of 2
 ##  $ src:List of 2
 ##   ..$ con  :Formal class 'PostgreSQLConnection' [package &quot;RPostgreSQL&quot;] with 1 slot
-##   .. .. ..@ Id: int [1:2] 19639 0
+##   .. .. ..@ Id: int [1:2] 10302 0
 ##   ..$ disco: NULL
 ##   ..- attr(*, &quot;class&quot;)= chr [1:4] &quot;src_PostgreSQLConnection&quot; &quot;src_dbi&quot; &quot;src_sql&quot; &quot;src&quot;
 ##  $ ops:List of 2
@@ -645,53 +644,53 @@ patients %&gt;% print(width = Inf)</code></pre>
 ##  9      12138  131429
 ## 10      10616  122738
 ## # … with more rows</code></pre>
-<p>Restrict to patients with tuberculosis. Found all possible ICD-9 codes related to tuberculosis, we search for the string ‘tuberculosis’ in the column long_title from the table d_icd_diagnoses. There are 354 codes that deal with tuberculosis.</p>
+<p>Restrict to patients with tuberculosis. Found all possible ICD-9 codes related to tuberculosis, we search for the string ‘tuberculosis’ in the column long_title from the table d_icd_diagnoses. There are 92 codes that deal with respiratory illnesses.</p>
 <pre class="r"><code>tbl(con, &quot;d_icd_diagnoses&quot;) %&gt;%
-  filter(str_detect(tolower(long_title), &quot;tuberculosis&quot;)) %&gt;%
-  print() -&gt; tb_codes</code></pre>
+  filter(str_detect(tolower(long_title), &quot;respiratory&quot;)) %&gt;%
+  print() -&gt; resp_codes</code></pre>
 <pre><code>## # Source:   lazy query [?? x 4]
 ## # Database: postgres 11.0.7 [postgres@/var/run/postgresql:5432/mimic]
-##    row_id icd9_code short_title        long_title                               
-##     &lt;int&gt; &lt;chr&gt;     &lt;chr&gt;              &lt;chr&gt;                                    
-##  1    174 01166     TB pneumonia-oth … Tuberculous pneumonia [any form], tuberc…
-##  2    180 01175     TB pneumothorax-h… Tuberculous pneumothorax, tubercle bacil…
-##  3    181 01176     TB pneumothorax-o… Tuberculous pneumothorax, tubercle bacil…
-##  4    182 01180     Pulmonary TB NEC-… Other specified pulmonary tuberculosis, …
-##  5    183 01181     Pulmonary TB NEC-… Other specified pulmonary tuberculosis, …
-##  6    184 01182     Pulmon TB NEC-exa… Other specified pulmonary tuberculosis, …
-##  7    185 01183     Pulmon TB NEC-mic… Other specified pulmonary tuberculosis, …
-##  8    186 01184     Pulmon TB NEC-cul… Other specified pulmonary tuberculosis, …
-##  9    187 01185     Pulmon TB NEC-his… Other specified pulmonary tuberculosis, …
-## 10    188 01186     Pulmon TB NEC-oth… Other specified pulmonary tuberculosis, …
+##    row_id icd9_code short_title       long_title                                
+##     &lt;int&gt; &lt;chr&gt;     &lt;chr&gt;             &lt;chr&gt;                                     
+##  1    224 01280     Resp TB NEC-unsp… Other specified respiratory tuberculosis,…
+##  2    225 01281     Resp TB NEC-no e… Other specified respiratory tuberculosis,…
+##  3    226 01282     Resp TB NEC-exam… Other specified respiratory tuberculosis,…
+##  4    227 01283     Resp TB NEC-micr… Other specified respiratory tuberculosis,…
+##  5    228 01284     Resp TB NEC-cult… Other specified respiratory tuberculosis,…
+##  6    229 01285     Resp TB NEC-hist… Other specified respiratory tuberculosis,…
+##  7    230 01286     Resp TB NEC-oth … Other specified respiratory tuberculosis,…
+##  8   1337 1650      Mal neo upper re… Malignant neoplasm of upper respiratory t…
+##  9   1338 1658      Mal neo thorax/r… Malignant neoplasm of other sites within …
+## 10   1339 1659      Mal neo resp sys… Malignant neoplasm of ill-defined sites w…
 ## # … with more rows</code></pre>
-<p><code>diagnoses_icd</code> table stores the diagnosis of each admission. We use <code>semi_join()</code> to keep the rows in <code>diagnoses_icd</code> that match the ICD-9 codes related to tuberculosis. There are 283 patients that are diagnosed with tuberculosis.</p>
+<p><code>diagnoses_icd</code> table stores the diagnosis of each admission. We use <code>semi_join()</code> to keep the rows in <code>diagnoses_icd</code> that match the ICD-9 codes related to tuberculosis. There are 1000 patients that are diagnosed with respiratory illness.</p>
 <pre class="r"><code>tbl(con, &quot;diagnoses_icd&quot;) %&gt;%
-  semi_join(tb_codes, by = &quot;icd9_code&quot;) %&gt;%
-  print() -&gt; tb_admissions</code></pre>
+  semi_join(resp_codes, by = &quot;icd9_code&quot;) %&gt;%
+  print() -&gt; resp_admissions</code></pre>
 <pre><code>## # Source:   lazy query [?? x 5]
 ## # Database: postgres 11.0.7 [postgres@/var/run/postgresql:5432/mimic]
 ##    row_id subject_id hadm_id seq_num icd9_code
 ##     &lt;int&gt;      &lt;int&gt;   &lt;int&gt;   &lt;int&gt; &lt;chr&gt;    
-##  1 581404      84318  188604       5 01186    
-##  2 137093      12139  148809       3 01190    
-##  3 236334      21192  140260       8 01190    
-##  4 437948      52831  106939       3 01190    
-##  5 459965      57599  180150       4 01190    
-##  6 465504      58702  114246      18 01190    
-##  7 512400      68946  182954       9 01190    
-##  8 589170      86226  106915       2 01190    
-##  9 604339      89840  186211       9 01190    
-## 10 250889      22532  167853       1 01193    
+##  1  30613       2723  165399       3 1370     
+##  2 135508      12011  130378       6 1370     
+##  3 227983      20425  174834       7 1370     
+##  4 311388      27597  180160      15 1370     
+##  5  34670       3100  169134      10 0796     
+##  6 183070      16468  143069       6 0796     
+##  7 226054      20249  175360      16 0796     
+##  8 245238      21985  122909       4 0796     
+##  9 273843      24553  152313       6 0796     
+## 10 299832      26781  121781       5 0796     
 ## # … with more rows</code></pre>
-<p>The <code>seq_num</code> field is a priority ranking for the diagnoses generated at the end of stay. In order to focus on patients for whom tuberculosis was central to their hospitalization, we will include records with tuberculosis in any of the first five diagnosis positions, according to the <code>seq_num</code> field. To avoid duplicate admissions, we use <code>group_by()</code> and <code>top_n()</code> to limit the query to the first tuberculosis diagnosis for each admission. Now there are 82 patients that were admitted to hospitalization, with repeated subjects.</p>
-<pre class="r"><code>tb_admissions %&gt;%
+<p>The <code>seq_num</code> field is a priority ranking for the diagnoses generated at the end of stay. In order to focus on patients for whom tuberculosis was central to their hospitalization, we will include records with respiratory illness in any of the first five diagnosis positions, according to the <code>seq_num</code> field. To avoid duplicate admissions, we use <code>group_by()</code> and <code>top_n()</code> to limit the query to the first respiratory diagnosis for each admission. Now there are 1000 patients that were admitted to hospitalization, with repeated subjects.</p>
+<pre class="r"><code>resp_admissions %&gt;%
   filter(seq_num &lt;= 5) %&gt;%
   group_by(subject_id, hadm_id) %&gt;%
   #top_n(1, wt = seq_num) %&gt;% #  not working. bug? use following as workaround
   filter(min_rank(seq_num) &lt;= 1) %&gt;%
   ungroup() %&gt;%
   select(subject_id, hadm_id, icd9_code, seq_num) %&gt;%
-  print() -&gt; tb_admissions</code></pre>
+  print() -&gt; resp_admissions</code></pre>
 <pre><code>## Warning: `lang_name()` is deprecated as of rlang 0.2.0.
 ## Please use `call_name()` instead.
 ## This warning is displayed once per session.</code></pre>
@@ -702,44 +701,60 @@ patients %&gt;% print(width = Inf)</code></pre>
 ## # Database: postgres 11.0.7 [postgres@/var/run/postgresql:5432/mimic]
 ##    subject_id hadm_id icd9_code seq_num
 ##         &lt;int&gt;   &lt;int&gt; &lt;chr&gt;       &lt;int&gt;
-##  1        627  172013 5111            2
-##  2       2723  165399 1370            3
-##  3       3417  192539 5110            5
-##  4       5006  113112 5110            1
-##  5       5018  114327 01894           3
-##  6       5018  154356 01894           1
-##  7       5774  108018 01215           3
-##  8       5872  131850 01803           2
-##  9       6317  122673 01803           1
-## 10       6317  194396 01896           2
+##  1         36  165660 99739           5
+##  2         39  106266 769             2
+##  3         66  104518 77089           4
+##  4         72  156857 769             2
+##  5         87  190659 769             4
+##  6         91  121205 51881           5
+##  7         92  142807 769             4
+##  8         93  160481 769             3
+##  9         94  140037 51884           2
+## 10        101  175533 51881           1
 ## # … with more rows</code></pre>
-<p>Now we <code>inner_join</code> the table of admissions to CCU and the table of admissions that include tuberculosis diagnosis. Very few subjects, specifically 3, were admitted to the CCU were diagnosed with tuberculosis, but one patient was primarily admitted with tuberculosis with a seq_num = 1.</p>
+<p>Now we <code>inner_join</code> the table of admissions to CCU and the table of admissions that include tuberculosis diagnosis.</p>
 <pre class="r"><code>ccu_admissions %&gt;%
-  inner_join(tb_admissions, by = c(&quot;subject_id&quot;, &quot;hadm_id&quot;)) %&gt;%
+  inner_join(resp_admissions, by = c(&quot;subject_id&quot;, &quot;hadm_id&quot;)) %&gt;%
   print() -&gt; study_admissions</code></pre>
 <pre><code>## # Source:   lazy query [?? x 4]
 ## # Database: postgres 11.0.7 [postgres@/var/run/postgresql:5432/mimic]
-##   subject_id hadm_id icd9_code seq_num
-##        &lt;int&gt;   &lt;int&gt; &lt;chr&gt;       &lt;int&gt;
-## 1      32114  133499 01205           1
-## 2      42327  176260 5111            2
-## 3      69232  146606 V1201           3</code></pre>
+##    subject_id hadm_id icd9_code seq_num
+##         &lt;int&gt;   &lt;int&gt; &lt;chr&gt;       &lt;int&gt;
+##  1        111  192123 51881           4
+##  2        177  143120 51881           2
+##  3        275  129886 51881           2
+##  4        308  166606 51881           2
+##  5        404  166989 51881           1
+##  6        479  148420 51881           5
+##  7        501  190462 51881           1
+##  8        605  149601 51884           3
+##  9        608  171266 51881           4
+## 10        619  167213 51881           4
+## # … with more rows</code></pre>
 </div>
 <div id="transform-and-augment-query-tables" class="section level2">
 <h2>Transform and augment query tables</h2>
-<p>Created a logical variable indicating if tuberculous is the principal diagonosis or not, whether the seq_num is 1 then it is the principal diagnosis. Only 1 patient fell under this variable.</p>
+<p>Created a logical variable indicating if respiratory illness was the principal diagonosis or not, whether the seq_num is 1 then it is the principal diagnosis.</p>
 <pre class="r"><code>study_admissions %&gt;%
   mutate(principal_dx = seq_num == 1) %&gt;%
   #select(-seq_num) %&gt;%
   print() -&gt; study_admissions</code></pre>
 <pre><code>## # Source:   lazy query [?? x 5]
 ## # Database: postgres 11.0.7 [postgres@/var/run/postgresql:5432/mimic]
-##   subject_id hadm_id icd9_code seq_num principal_dx
-##        &lt;int&gt;   &lt;int&gt; &lt;chr&gt;       &lt;int&gt; &lt;lgl&gt;       
-## 1      32114  133499 01205           1 TRUE        
-## 2      42327  176260 5111            2 FALSE       
-## 3      69232  146606 V1201           3 FALSE</code></pre>
-<p>We want to add information about the severity of patients’ ailments. The <code>drgcodes</code> table contains, for <code>DRG</code> codes from the All Payers Registry (APR), severity and mortality indicators. We pull the drug severity information and right-join it to our query table. There are 3 patients that are on drugs and the patient that was hospitalized had a drug severity of 4.</p>
+##    subject_id hadm_id icd9_code seq_num principal_dx
+##         &lt;int&gt;   &lt;int&gt; &lt;chr&gt;       &lt;int&gt; &lt;lgl&gt;       
+##  1        111  192123 51881           4 FALSE       
+##  2        177  143120 51881           2 FALSE       
+##  3        275  129886 51881           2 FALSE       
+##  4        308  166606 51881           2 FALSE       
+##  5        404  166989 51881           1 TRUE        
+##  6        479  148420 51881           5 FALSE       
+##  7        501  190462 51881           1 TRUE        
+##  8        605  149601 51884           3 FALSE       
+##  9        608  171266 51881           4 FALSE       
+## 10        619  167213 51881           4 FALSE       
+## # … with more rows</code></pre>
+<p>We want to add information about the severity of patients’ ailments. The <code>drgcodes</code> table contains, for <code>DRG</code> codes from the All Payers Registry (APR), severity and mortality indicators. We pull the drug severity information and right-join it to our query table.</p>
 <pre class="r"><code>tbl(con, &quot;drgcodes&quot;) %&gt;%
   filter(str_detect(drg_type, &quot;APR&quot;)) %&gt;%
   select(subject_id, hadm_id, drg_severity) %&gt;%
@@ -748,14 +763,19 @@ patients %&gt;% print(width = Inf)</code></pre>
   print() -&gt; study_admissions</code></pre>
 <pre><code>## # Source:   lazy query [?? x 6]
 ## # Database: postgres 11.0.7 [postgres@/var/run/postgresql:5432/mimic]
-##   subject_id hadm_id drg_severity icd9_code seq_num principal_dx
-##        &lt;int&gt;   &lt;int&gt;        &lt;dbl&gt; &lt;chr&gt;       &lt;int&gt; &lt;lgl&gt;       
-## 1      32114  133499            4 01205           1 TRUE        
-## 2      32114  133499            4 01205           1 TRUE        
-## 3      42327  176260            4 5111            2 FALSE       
-## 4      42327  176260            4 5111            2 FALSE       
-## 5      69232  146606            2 V1201           3 FALSE       
-## 6      69232  146606            2 V1201           3 FALSE</code></pre>
+##    subject_id hadm_id drg_severity icd9_code seq_num principal_dx
+##         &lt;int&gt;   &lt;int&gt;        &lt;dbl&gt; &lt;chr&gt;       &lt;int&gt; &lt;lgl&gt;       
+##  1        111  192123            4 51881           4 FALSE       
+##  2        177  143120            1 51881           2 FALSE       
+##  3        275  129886            4 51881           2 FALSE       
+##  4        308  166606            1 51881           2 FALSE       
+##  5        404  166989            4 51881           1 TRUE        
+##  6        479  148420            1 51881           5 FALSE       
+##  7        501  190462            3 51881           1 TRUE        
+##  8        605  149601            4 51884           3 FALSE       
+##  9        605  149601            4 51884           3 FALSE       
+## 10        608  171266            1 51881           4 FALSE       
+## # … with more rows</code></pre>
 <p>Pull the admission time <code>admittime</code>, discharge time <code>dischtime</code>, date of birth <code>dob</code>, and date of death <code>dod</code>. We are interested in the mortaility rate 30 days after discharge. So we only keep patients who didn’t die in hospital.</p>
 <pre class="r"><code>study_admissions %&gt;%
   left_join(
@@ -772,25 +792,44 @@ patients %&gt;% print(width = Inf)</code></pre>
   print(width = Inf) -&gt; study_admissions</code></pre>
 <pre><code>## # Source:   lazy query [?? x 10]
 ## # Database: postgres 11.0.7 [postgres@/var/run/postgresql:5432/mimic]
-##   subject_id hadm_id drg_severity icd9_code seq_num principal_dx
-##        &lt;int&gt;   &lt;int&gt;        &lt;dbl&gt; &lt;chr&gt;       &lt;int&gt; &lt;lgl&gt;       
-## 1      32114  133499            4 01205           1 TRUE        
-## 2      32114  133499            4 01205           1 TRUE        
-## 3      69232  146606            2 V1201           3 FALSE       
-## 4      69232  146606            2 V1201           3 FALSE       
-##   admittime           dischtime           dob                
-##   &lt;dttm&gt;              &lt;dttm&gt;              &lt;dttm&gt;             
-## 1 2131-06-29 05:58:00 2131-07-18 11:26:00 2087-04-16 00:00:00
-## 2 2131-06-29 05:58:00 2131-07-18 11:26:00 2087-04-16 00:00:00
-## 3 2128-06-07 16:40:00 2128-06-12 14:40:00 2055-04-14 00:00:00
-## 4 2128-06-07 16:40:00 2128-06-12 14:40:00 2055-04-14 00:00:00
-##   dod                
-##   &lt;dttm&gt;             
-## 1 NA                 
-## 2 NA                 
-## 3 NA                 
-## 4 NA</code></pre>
-<p>Created a new column for the age of death and the mortality column is to see if the death is within 30 days of discharge. Subjects with tuberculosis, age, drug severity, etc…are included.</p>
+##    subject_id hadm_id drg_severity icd9_code seq_num principal_dx
+##         &lt;int&gt;   &lt;int&gt;        &lt;dbl&gt; &lt;chr&gt;       &lt;int&gt; &lt;lgl&gt;       
+##  1        111  192123            4 51881           4 FALSE       
+##  2        177  143120            1 51881           2 FALSE       
+##  3        308  166606            1 51881           2 FALSE       
+##  4        501  190462            3 51881           1 TRUE        
+##  5        605  149601            4 51884           3 FALSE       
+##  6        605  149601            4 51884           3 FALSE       
+##  7        608  171266            1 51881           4 FALSE       
+##  8        619  167213            4 51881           4 FALSE       
+##  9        631  100660            4 51881           1 TRUE        
+## 10        674  116577            3 51881           2 FALSE       
+##    admittime           dischtime           dob                
+##    &lt;dttm&gt;              &lt;dttm&gt;              &lt;dttm&gt;             
+##  1 2142-04-24 06:55:00 2142-05-05 11:45:00 2075-07-16 00:00:00
+##  2 2125-11-09 21:12:00 2125-12-12 14:45:00 2048-04-20 00:00:00
+##  3 2135-09-02 23:07:00 2135-10-20 11:53:00 2106-03-01 00:00:00
+##  4 2190-01-28 02:04:00 2190-02-04 14:30:00 2106-06-21 00:00:00
+##  5 2197-12-04 02:01:00 2197-12-14 18:29:00 1895-04-05 00:00:00
+##  6 2197-12-04 02:01:00 2197-12-14 18:29:00 1895-04-05 00:00:00
+##  7 2167-02-22 20:17:00 2167-03-24 15:30:00 2098-12-20 00:00:00
+##  8 2105-12-22 22:16:00 2105-12-29 16:05:00 2057-11-29 00:00:00
+##  9 2124-01-23 12:31:00 2124-01-28 15:55:00 2049-02-05 00:00:00
+## 10 2192-05-16 19:05:00 2192-05-23 13:19:00 2113-12-14 00:00:00
+##    dod                
+##    &lt;dttm&gt;             
+##  1 2144-07-01 00:00:00
+##  2 2126-02-20 00:00:00
+##  3 2135-10-28 00:00:00
+##  4 2191-02-21 00:00:00
+##  5 2198-03-27 00:00:00
+##  6 2198-03-27 00:00:00
+##  7 2171-02-21 00:00:00
+##  8 NA                 
+##  9 2124-07-18 00:00:00
+## 10 2195-02-17 00:00:00
+## # … with more rows</code></pre>
+<p>Created a new column for the age of death and the mortality column is to see if the death is within 30 days of discharge. Subjects with respiratory illness, age, drug severity, etc…are included.</p>
 <pre class="r"><code>study_admissions %&gt;%
   mutate(tt_death = date_part(&quot;day&quot;, dod) - date_part(&quot;day&quot;, dischtime)) %&gt;%
   mutate(mortality = tt_death &lt;= 30) %&gt;%
@@ -809,13 +848,41 @@ patients %&gt;% print(width = Inf)</code></pre>
   print() -&gt; study_admissions</code></pre>
 <pre><code>## # Source:   lazy query [?? x 8]
 ## # Database: postgres 11.0.7 [postgres@/var/run/postgresql:5432/mimic]
-##   subject_id hadm_id   age mortality drg_severity icd9_code seq_num principal_dx
-##        &lt;int&gt;   &lt;int&gt; &lt;dbl&gt; &lt;lgl&gt;            &lt;dbl&gt; &lt;chr&gt;       &lt;int&gt; &lt;lgl&gt;       
-## 1      32114  133499    44 NA                   4 01205           1 TRUE        
-## 2      32114  133499    44 NA                   4 01205           1 TRUE        
-## 3      69232  146606    73 NA                   2 V1201           3 FALSE       
-## 4      69232  146606    73 NA                   2 V1201           3 FALSE</code></pre>
+##    subject_id hadm_id   age mortality drg_severity icd9_code seq_num
+##         &lt;int&gt;   &lt;int&gt; &lt;dbl&gt; &lt;lgl&gt;            &lt;dbl&gt; &lt;chr&gt;       &lt;int&gt;
+##  1        111  192123    66 TRUE                 4 51881           4
+##  2        177  143120    77 TRUE                 1 51881           2
+##  3        308  166606    29 TRUE                 1 51881           2
+##  4        501  190462    83 TRUE                 3 51881           1
+##  5        605  149601   302 TRUE                 4 51884           3
+##  6        605  149601   302 TRUE                 4 51884           3
+##  7        608  171266    68 TRUE                 1 51881           4
+##  8        619  167213    48 NA                   4 51881           4
+##  9        631  100660    74 TRUE                 4 51881           1
+## 10        674  116577    78 TRUE                 3 51881           2
+## # … with more rows, and 1 more variable: principal_dx &lt;lgl&gt;</code></pre>
 <p>Many mortality indicators are missing, due to neither the hospital database nor the social security database having a record of these patients’ deaths. We could convert these to <code>FALSE</code> values, but it may be helpful to retain in the analytic table this information on whether deaths were recorded at all, e.g. for validation or sensitivity testing.</p>
+<p>Let’s try to select the patients that have a 30 day mortality rate that were admitted to the CCU primarily from respiratory illness.</p>
+<pre class="r"><code>study_admissions %&gt;%
+  group_by(subject_id) %&gt;%
+  filter(seq_num == 1) %&gt;%
+print() -&gt; study_1</code></pre>
+<pre><code>## # Source:   lazy query [?? x 8]
+## # Database: postgres 11.0.7 [postgres@/var/run/postgresql:5432/mimic]
+## # Groups:   subject_id
+##    subject_id hadm_id   age mortality drg_severity icd9_code seq_num
+##         &lt;int&gt;   &lt;int&gt; &lt;dbl&gt; &lt;lgl&gt;            &lt;dbl&gt; &lt;chr&gt;       &lt;int&gt;
+##  1        501  190462    83 TRUE                 3 51881           1
+##  2        631  100660    74 TRUE                 4 51881           1
+##  3       1802  111237    70 TRUE                 1 51881           1
+##  4       1816  137693    68 TRUE                 4 51881           1
+##  5       1816  137693    68 TRUE                 4 51881           1
+##  6       2187  186282    46 TRUE                 4 51881           1
+##  7       2301  149119    68 NA                   1 51881           1
+##  8       2549  159440    67 TRUE                 1 51881           1
+##  9       2614  142942   300 TRUE                 4 51881           1
+## 10       2703  109401    47 NA                   4 51881           1
+## # … with more rows, and 1 more variable: principal_dx &lt;lgl&gt;</code></pre>
 <p>Finally, let’s merge some demographic information (ethnicity, gender) into our study <code>study_admissions</code>.</p>
 <pre class="r"><code>tbl(con, &quot;admissions&quot;) %&gt;%
   select(subject_id, ethnicity) %&gt;%
@@ -861,10 +928,19 @@ patients %&gt;% print(width = Inf)</code></pre>
   print() -&gt; study_subjects</code></pre>
 <pre><code>## # Source:   lazy query [?? x 3]
 ## # Database: postgres 11.0.7 [postgres@/var/run/postgresql:5432/mimic]
-##   subject_id gender ethnicity                     
-##        &lt;int&gt; &lt;chr&gt;  &lt;chr&gt;                         
-## 1      69232 F      WHITE                         
-## 2      32114 F      HISPANIC/LATINO - PUERTO RICAN</code></pre>
+##    subject_id gender ethnicity            
+##         &lt;int&gt; &lt;chr&gt;  &lt;chr&gt;                
+##  1      25523 F      WHITE                
+##  2      73444 M      WHITE                
+##  3       5960 F      UNKNOWN/NOT SPECIFIED
+##  4      72528 F      WHITE                
+##  5      90020 M      WHITE                
+##  6      68391 M      WHITE                
+##  7      27382 F      WHITE                
+##  8       3703 M      WHITE                
+##  9      56772 F      WHITE                
+## 10      57321 M      ASIAN - CHINESE      
+## # … with more rows</code></pre>
 <p>Let’s resolves ome diversity and inconsistency in the <code>ethnicity</code> field:</p>
 <pre class="r"><code>unknown_ethnicity &lt;- c(
   &quot;OTHER&quot;,
@@ -887,11 +963,20 @@ study_subjects %&gt;%
   )) %&gt;%
   select(subject_id, gender, ethnic_group) %&gt;%
   print() -&gt; study_subjects</code></pre>
-<pre><code>## # A tibble: 2 x 3
-##   subject_id gender ethnic_group
-##        &lt;int&gt; &lt;chr&gt;  &lt;chr&gt;       
-## 1      32114 F      HISPANIC    
-## 2      69232 F      WHITE</code></pre>
+<pre><code>## # A tibble: 680 x 3
+##    subject_id gender ethnic_group
+##         &lt;int&gt; &lt;chr&gt;  &lt;chr&gt;       
+##  1        111 F      WHITE       
+##  2        177 M      WHITE       
+##  3        308 F      &lt;NA&gt;        
+##  4        501 F      WHITE       
+##  5        605 F      ASIAN       
+##  6        608 M      WHITE       
+##  7        619 F      WHITE       
+##  8        631 M      WHITE       
+##  9        674 F      WHITE       
+## 10        704 M      &lt;NA&gt;        
+## # … with 670 more rows</code></pre>
 <p>Some patients are coded as belonging to more than one ethnic group. To resolve these inconsistencies, we define a helper function to pick the modal value from a vector of values in R, which can be used by the <code>summarize()</code> function to choose one ethnic group for each patient.</p>
 <pre class="r"><code>most &lt;- function(x) {
   if (all(is.na(x))) return(NA_character_)
@@ -906,33 +991,58 @@ study_subjects %&gt;%
   ungroup() %&gt;%
   mutate(ethnic_group = ifelse(is.na(ethnic_group), &quot;UNKNOWN&quot;, ethnic_group)) %&gt;%
   print() -&gt; subject_ethnic_groups</code></pre>
-<pre><code>## # A tibble: 2 x 2
-##   subject_id ethnic_group
-##        &lt;int&gt; &lt;chr&gt;       
-## 1      32114 HISPANIC    
-## 2      69232 WHITE</code></pre>
+<pre><code>## # A tibble: 664 x 2
+##    subject_id ethnic_group
+##         &lt;int&gt; &lt;chr&gt;       
+##  1        111 WHITE       
+##  2        177 WHITE       
+##  3        308 UNKNOWN     
+##  4        501 WHITE       
+##  5        605 ASIAN       
+##  6        608 WHITE       
+##  7        619 WHITE       
+##  8        631 WHITE       
+##  9        674 WHITE       
+## 10        704 UNKNOWN     
+## # … with 654 more rows</code></pre>
 <pre class="r"><code>study_subjects %&gt;%
   select(subject_id, gender) %&gt;%
   left_join(subject_ethnic_groups, by = &quot;subject_id&quot;) %&gt;%
   print() -&gt; study_subjects</code></pre>
-<pre><code>## # A tibble: 2 x 3
-##   subject_id gender ethnic_group
-##        &lt;int&gt; &lt;chr&gt;  &lt;chr&gt;       
-## 1      32114 F      HISPANIC    
-## 2      69232 F      WHITE</code></pre>
+<pre><code>## # A tibble: 680 x 3
+##    subject_id gender ethnic_group
+##         &lt;int&gt; &lt;chr&gt;  &lt;chr&gt;       
+##  1        111 F      WHITE       
+##  2        177 M      WHITE       
+##  3        308 F      UNKNOWN     
+##  4        501 F      WHITE       
+##  5        605 F      ASIAN       
+##  6        608 M      WHITE       
+##  7        619 F      WHITE       
+##  8        631 M      WHITE       
+##  9        674 F      WHITE       
+## 10        704 M      UNKNOWN     
+## # … with 670 more rows</code></pre>
 <p>Now we add the demographic information <code>gender</code> and <code>ethnicity</code> into our <code>study_admissions</code> table:</p>
 <pre class="r"><code>study_admissions %&gt;%
   left_join(study_subjects, by = &quot;subject_id&quot;, copy = TRUE) %&gt;%
   print() -&gt; study_admissions</code></pre>
 <pre><code>## # Source:   lazy query [?? x 10]
 ## # Database: postgres 11.0.7 [postgres@/var/run/postgresql:5432/mimic]
-##   subject_id hadm_id   age mortality drg_severity icd9_code seq_num principal_dx
-##        &lt;int&gt;   &lt;int&gt; &lt;dbl&gt; &lt;lgl&gt;            &lt;dbl&gt; &lt;chr&gt;       &lt;int&gt; &lt;lgl&gt;       
-## 1      32114  133499    44 NA                   4 01205           1 TRUE        
-## 2      32114  133499    44 NA                   4 01205           1 TRUE        
-## 3      69232  146606    73 NA                   2 V1201           3 FALSE       
-## 4      69232  146606    73 NA                   2 V1201           3 FALSE       
-## # … with 2 more variables: gender &lt;chr&gt;, ethnic_group &lt;chr&gt;</code></pre>
+##    subject_id hadm_id   age mortality drg_severity icd9_code seq_num
+##         &lt;int&gt;   &lt;int&gt; &lt;dbl&gt; &lt;lgl&gt;            &lt;dbl&gt; &lt;chr&gt;       &lt;int&gt;
+##  1        111  192123    66 TRUE                 4 51881           4
+##  2        177  143120    77 TRUE                 1 51881           2
+##  3        308  166606    29 TRUE                 1 51881           2
+##  4        501  190462    83 TRUE                 3 51881           1
+##  5        605  149601   302 TRUE                 4 51884           3
+##  6        605  149601   302 TRUE                 4 51884           3
+##  7        608  171266    68 TRUE                 1 51881           4
+##  8        619  167213    48 NA                   4 51881           4
+##  9        631  100660    74 TRUE                 4 51881           1
+## 10        674  116577    78 TRUE                 3 51881           2
+## # … with more rows, and 3 more variables: principal_dx &lt;lgl&gt;, gender &lt;chr&gt;,
+## #   ethnic_group &lt;chr&gt;</code></pre>
 <p>Check to see if any of the drugs that the patients were taking also had HIV.</p>
 <pre class="r"><code>tbl(con, &quot;drgcodes&quot;) %&gt;%
   print() -&gt; drgcodes</code></pre>

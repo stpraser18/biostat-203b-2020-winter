@@ -120,7 +120,7 @@ tbl(con, "transfers") %>%
   print() -> ccu_admissions
 ```
 
-Restrict to patients with tuberculosis. Found all possible ICD-9 codes related to tuberculosis, we search for the string 'tuberculosis' in the column long_title from the table d_icd_diagnoses. There are 92 codes that deal with respiratory illnesses. 
+Restrict to patients with respiratory illness. Found all possible ICD-9 codes related to respiratory illnesses, we search for the string 'tuberculosis' in the column long_title from the table d_icd_diagnoses. There are 92 codes that deal with respiratory illnesses. 
 ```{r}
 tbl(con, "d_icd_diagnoses") %>%
   filter(str_detect(tolower(long_title), "respiratory")) %>%
@@ -145,7 +145,7 @@ resp_admissions %>%
   select(subject_id, hadm_id, icd9_code, seq_num) %>%
   print() -> resp_admissions
 ```
-Now we `inner_join` the table of admissions to CCU and the table of admissions that include respiratory diagnosis.
+Now we `inner_join` the table of admissions to CCU and the table of admissions that include respiratory diagnosis. 1000 patients got admitted to the CCU that have respiratory illness. 
 ```{r}
 ccu_admissions %>%
   inner_join(resp_admissions, by = c("subject_id", "hadm_id")) %>%
@@ -293,12 +293,22 @@ study_admissions %>%
   print() -> study_admissions
 ```
 
-Let's try to select the patients that have a 30 day mortality rate that were admitted to the CCU primarily from respiratory illness. Some of the subjects are repeated with a total of 185 subjects diagnosed with respiratory illness, we have found that subjects have the icd9_code of 51881 which is acute respiratory failure.
+Let's try to select the patients that have a 30 day mortality rate that were admitted to the CCU primarily from respiratory illness. There is a total of 129 subjects diagnosed with respiratory illness, we have found that subjects have the icd9_code of 51881 which is acute respiratory failure.
 ```{r}
 study_admissions %>%
-  group_by(subject_id) %>%
+  group_by(subject_id, hadm_id) %>%
+  filter(row_number() == 1) %>%
   filter(seq_num == 1) %>%
 print() -> study_1
+```
+
+Data visualization for the number of 30-day mortality and those that have survived.
+```{r}
+study_1 %>%
+  group_by(mortality) %>%
+  summarize(count = n()) %>%
+  ggplot(aes(x = mortality, y = count)) +
+  geom_col()
 ```
 
 
@@ -355,7 +365,7 @@ box_content[2] = "Exclude patients of age < 18 \n n = 8,180" # 2nd box
 box_content[3] = "Exclude patients with no ICU admissions \n n = 1,071" # 3rd box
 box_content[4] = "Exclude patients with diabetes \n n = 1,324" # etc...
 box_content[5] = "Exclude patients with sepsis \n n = 4,804"
-box_content[6] = "Study cohort \n n = 43,597"
+box_content[6] = "Study cohort \n n = 129"
 
 # adjust the size of boxes to fit content
 box_x <- c(0.20, 0.25, 0.25, 0.25, 0.25, 0.20)

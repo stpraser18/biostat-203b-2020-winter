@@ -19,7 +19,7 @@ In this assignment, you are to write a report analyzing the electronic health re
 
 1. An informative title. _30-Day Mortality Rate of Respiratory Patients Admitted to CCU_ 
 
-2. Introduction. Describe the MIMIC-III data set and what research hypothesis/goal you are to address using this data. **Introduction:** I used the d_icd_diagnoses to obtain the patients who were diagnosed with any respiratory illness and diagnoses_icd to look up the code for the diagnoses. The table of admissions to CCU and table of admissions for the respiratory diagnoses was used. Hypothesis: Patients who were diagnosed with any respiratory illness and admitted into the CCU have a high chance of dying within 30 days as it is one of the top 10 causes of death according to the World Health Organization.
+2. Introduction. Describe the MIMIC-III data set and what research hypothesis/goal you are to address using this data. **Introduction:** I used the d_icd_diagnoses to obtain the patients who were diagnosed with any respiratory illness and diagnoses_icd to look up the code for the diagnoses. The table of admissions to MICU and table of admissions for the respiratory diagnoses was used. Hypothesis: Patients who were diagnosed with any respiratory illness and admitted into the MICU have a high chance of dying within 30 days as it is one of the top 10 causes of death according to the World Health Organization.
 
 3. Data preparation. Create a study cohort from MIMIC-III corresponding to your research hypothesis/goal. See the examplary code below. Use a CONSORT flow diagram to summarize your steps to create the cohort.
 
@@ -110,14 +110,14 @@ But keep in mind that the point of using a database software is that the data ta
 
 In this section, we demo how to create a cohort of patients who were directly admitted into CCU and were diagnosed with tuberculosis.
 
-First we create a (query) table of patients who were directly admitted into CCU.
+First we create a (query) table of patients who were directly admitted into MICU (Medical Intensive Care Unit).
 ```{r}
 tbl(con, "transfers") %>%
   select(subject_id, hadm_id, prev_careunit, curr_careunit) %>%
-  filter(is.na(prev_careunit) & curr_careunit == "CCU") %>%
+  filter(is.na(prev_careunit) & curr_careunit == "MICU") %>%
   select(subject_id, hadm_id) %>%
   distinct() %>%
-  print() -> ccu_admissions
+  print() -> micu_admissions
 ```
 
 Restrict to patients with respiratory illness. Found all possible ICD-9 codes related to respiratory illnesses, we search for the string 'tuberculosis' in the column long_title from the table d_icd_diagnoses. There are 92 codes that deal with respiratory illnesses. 
@@ -127,7 +127,7 @@ tbl(con, "d_icd_diagnoses") %>%
   print() -> resp_codes
 ```
 
-`diagnoses_icd` table stores the diagnosis of each admission. We use `semi_join()` to keep the rows in `diagnoses_icd` that match the ICD-9 codes related to tuberculosis. There are 1000 patients that are diagnosed with respiratory illness.
+`diagnoses_icd` table stores the diagnosis of each admission. We use `semi_join()` to keep the rows in `diagnoses_icd` that match the ICD-9 codes related to respiratory illness. There are 1000 patients that are diagnosed with respiratory illness.
 ```{r}
 tbl(con, "diagnoses_icd") %>%
   semi_join(resp_codes, by = "icd9_code") %>%
@@ -145,9 +145,9 @@ resp_admissions %>%
   select(subject_id, hadm_id, icd9_code, seq_num) %>%
   print() -> resp_admissions
 ```
-Now we `inner_join` the table of admissions to CCU and the table of admissions that include respiratory diagnosis. 1000 patients got admitted to the CCU that have respiratory illness. 
+Now we `inner_join` the table of admissions to MICU and the table of admissions that include respiratory diagnosis. 1000 patients got admitted to the MICU that have respiratory illness. 
 ```{r}
-ccu_admissions %>%
+micu_admissions %>%
   inner_join(resp_admissions, by = c("subject_id", "hadm_id")) %>%
   print() -> study_admissions
 ```
@@ -293,7 +293,7 @@ study_admissions %>%
   print() -> study_admissions
 ```
 
-Let's try to select the patients that have a 30 day mortality rate that were admitted to the CCU primarily from respiratory illness. There is a total of 129 subjects diagnosed with respiratory illness, we have found that subjects have the icd9_code of 51881 which is acute respiratory failure.
+Let's try to select the patients that have a 30 day mortality rate that were admitted to the MICU primarily from respiratory illness. There is a total of 129 subjects diagnosed with respiratory illness, we have found that subjects have the icd9_code of 51881 which is acute respiratory failure.
 ```{r}
 study_admissions %>%
   group_by(subject_id, hadm_id) %>%
@@ -302,7 +302,7 @@ study_admissions %>%
 print() -> study_1
 ```
 
-Data visualization for the number of 30-day mortality and those that have survived.
+Data visualization for the number of 30-day mortality and those that have survived. About 500 patients did not survive. A little less than 400 patients were labeled NA. 
 ```{r}
 study_1 %>%
   group_by(mortality) %>%
@@ -310,7 +310,14 @@ study_1 %>%
   ggplot(aes(x = mortality, y = count)) +
   geom_col()
 ```
-
+Group data by gender.
+```{r}
+study_1 %>%
+  group_by(gender) %>%
+  summarize(count = n()) %>%
+  ggplot(aes(x = gender, y = count)) +
+  geom_col()
+```
 
 ## Close the connection to a database
 
@@ -347,36 +354,30 @@ openplotmat()
 # 1st column indicates x axis position between 0 and 1
 # 2nd column indicates y axis position between 0 and 1
 # automatically assigns vertical position
-num_of_boxes <- 6
+num_of_boxes <- 4
 auto_coords = coordinates(num_of_boxes)
 vert_pos = rev(auto_coords[,1])
 box_pos <- matrix(nrow = num_of_boxes, ncol = 2, data = 0)
 box_pos[1,] = c(0.20, vert_pos[1]) # 1st box
 box_pos[2,] = c(0.70, vert_pos[2]) # 2nd box
 box_pos[3,] = c(0.70, vert_pos[3]) # 3rd box
-box_pos[4,] = c(0.70, vert_pos[4]) # etc...
-box_pos[5,] = c(0.70, vert_pos[5])
-box_pos[6,] = c(0.20, vert_pos[6])
+box_pos[4,] = c(0.20, vert_pos[4])
 
 # content of boxes
 box_content <- matrix(nrow = num_of_boxes, ncol = 1, data = 0)
 box_content[1] = "All patients in MIMIC-III \n n = 58,976" # 1st box
-box_content[2] = "Exclude patients of age < 18 \n n = 8,180" # 2nd box
-box_content[3] = "Exclude patients with no ICU admissions \n n = 1,071" # 3rd box
-box_content[4] = "Exclude patients with diabetes \n n = 1,324" # etc...
-box_content[5] = "Exclude patients with sepsis \n n = 4,804"
-box_content[6] = "Study cohort \n n = 129"
+box_content[2] = "Exclude patients not admitted to ICU \n n= 57,976" # 2nd box
+box_content[3] = "Exclude patients not primarily diagnosed with resp \n n = 110" # 3rd box
+box_content[4] = "Study cohort \n n = 890"
 
 # adjust the size of boxes to fit content
-box_x <- c(0.20, 0.25, 0.25, 0.25, 0.25, 0.20)
-box_y <- c(0.07, 0.07, 0.07, 0.07, 0.07, 0.07)
+box_x <- c(0.20, 0.25, 0.27, 0.20)
+box_y <- c(0.07, 0.07, 0.07, 0.07)
 
 # Draw the arrows
 straightarrow(from = c(box_pos[1,1],box_pos[2,2]), to = box_pos[2,], lwd = 1)  
 straightarrow(from = c(box_pos[1,1],box_pos[3,2]), to = box_pos[3,], lwd = 1)  
-straightarrow(from = c(box_pos[1,1],box_pos[4,2]), to = box_pos[4,], lwd = 1)  
-straightarrow(from = c(box_pos[1,1],box_pos[5,2]), to = box_pos[5,], lwd = 1)  
-straightarrow(from = box_pos[1,], to = box_pos[6,], lwd = 1)
+straightarrow(from = box_pos[1,], to = box_pos[4,], lwd = 1)
 
 # Draw the boxes
 for (i in 1:num_of_boxes) {

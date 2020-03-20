@@ -303,22 +303,48 @@ study_admissions %>%
   left_join(study_subjects, by = "subject_id", copy = TRUE) %>%
   print() -> study_admissions
 ```
-Graph primary diagnosis of respiratory illness to the number of mortality.
-```{r}
-library(ISLR)
-```
-Let's try to select the patients that have a 30 day mortality rate that were admitted to the MICU primarily from respiratory illness. There is a total of 129 subjects diagnosed with respiratory illness, we have found that subjects have the icd9_code of 51881 which is acute respiratory failure.
+Filtered the amount of subjects that were repeated. 
 ```{r}
 study_admissions %>%
+  group_by(subject_id, hadm_id) %>%
+  filter(row_number() == 1) %>%
+  print() -> study_admissionsfull 
+```
+Graph primary diagnosis of respiratory illness to the number of mortality.
+```{r}
+study_admissionsfull %>%
+  group_by(seq_num, mortality) %>%
+  summarize(count = n()) %>%
+  ggplot(aes(x = seq_num, y = count)) +
+  geom_col()
+```
+#STILL NEED TO DO THIS drop columns that are NA for mortality to find the true amount of those that did not survive the 30 day mortality 
+```{r}
+study_admissionsfull %>%
+  group_by(mortality) %>%
+  drop_na() %>%
+  print() -> study_admissionstrue
+```
+
+Let's try to select the patients that have a 30 day mortality rate that were admitted to the MICU primarily from respiratory illness. There is a total of 890 subjects primarily diagnosed with respiratory illness, we have found that subjects have the icd9_code of 51881 which is acute respiratory failure.
+```{r}
+study_admissionsfull %>%
   group_by(subject_id, hadm_id) %>%
   filter(row_number() == 1) %>%
   filter(seq_num == 1) %>%
 print() -> study_1
 ```
-
+There are 500 deaths after 30 days and there are 390 that are labeled NA. 
+```{r}
+study_1 %>%
+  group_by(mortality) %>%
+  summarize(count = n()) %>%
+  ggplot(aes(x = mortality, y = count)) +
+  geom_col()
+```
 Compute study_1 date which includes all demographics and information of the subjects that were diagnosed with respiratory illness.
 ```{r}
-compute(study_1)
+collect(study_1)
 ```
 Data visualization for the number of 30-day mortality and those that have survived. About 500 patients did not survive. A little less than 400 patients were labeled NA. 
 ```{r}
@@ -339,20 +365,19 @@ study_1 %>%
 Question 5 - Analytics. Use at least two analytical approaches to address your research hypothesis/goal. 
 **Part 1: Logistic Regression**
 ```{r}
-study_admissions <- glm(mortality ~ principal_dx, data = study_admissions, family = "binomial")
-summary(study_1)
+head(study_admissionsfull)
+```
+```{r}
+summary(study_admissionsfull)
+```
+```{r}
+sapply(study_admissionsfull, sd)
+```
+```{r}
+study_admissionsfull <- glm(mortality ~ seq_num, data = study_admissionsfull, family = "binomial")
 ```
 
-```{r}
-collect(study_1)
-sample_n(study_1, 3)
-set.seed(123)
-sample <- sample(c(TRUE, FALSE), nrow(default), replace = T, prob = c(0.6,0.4))
-train <- default[sample, ]
-test <- default[!sample, ]
-model <- glm( study_1, family = binomial)
-summary(model)$coef
-```
+
 
 
 ## Close the connection to a database
@@ -363,8 +388,10 @@ dbDisconnect(con)
 ```
 
 
-
-
+```{r}
+study_1 %>%
+  print()
+```
 
 
 

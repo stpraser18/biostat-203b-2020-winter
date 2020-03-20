@@ -25,7 +25,7 @@ In this assignment, you are to write a report analyzing the electronic health re
 
 4. Data visualization. Use visualization to summarize the cohort you created. 
 
-5. Analytics. Use at least two analytical approaches to address your research hypothesis/goal. For example, we can use (1) logistic regression and (2) neural network to build a predictive model for the 30-day mortality rate of patients admitted into CCU and compare their predictive performance. Summarize your results in graphs.
+5. Analytics. Use at least two analytical approaches to address your research hypothesis/goal. For example, we can use (1) logistic regression and (2) neural network to build a predictive model for the 30-day mortality rate of patients admitted into the MICU and compare their predictive performance. Summarize your results in graphs.
 
 6. Conclusions. 
 
@@ -119,7 +119,18 @@ tbl(con, "transfers") %>%
   distinct() %>%
   print() -> micu_admissions
 ```
-
+```{r}
+tbl(con, "transfers") %>%
+  group_by(subject_id, hadm_id) %>%
+print() -> all_admissions
+```
+```{r}
+all_admissions %>%
+  group_by(curr_careunit) %>%
+  summarize(count = n()) %>%
+  ggplot(aes(x = curr_careunit, y = count)) +
+  geom_col()
+```
 Restrict to patients with respiratory illness. Found all possible ICD-9 codes related to respiratory illnesses, we search for the string 'tuberculosis' in the column long_title from the table d_icd_diagnoses. There are 92 codes that deal with respiratory illnesses. 
 ```{r}
 tbl(con, "d_icd_diagnoses") %>%
@@ -162,12 +173,12 @@ study_admissions %>%
   #select(-seq_num) %>%
   print() -> study_admissions
 ```
-Create graph based on the seq_num, dealing with the primary diagnoses of respiratory illness. 
+Create graph based on the seq_num, dealing with the primary diagnoses of respiratory illness. There are about 1000 patients who are seq_num = 1.
 ```{r}
 study_admissions %>% 
-  group_by(seq_num) %>%
+  group_by(principal_dx) %>%
   summarize(count = n()) %>%
-  ggplot(aes(x = seq_num, y = count)) +
+  ggplot(aes(x = principal_dx, y = count)) +
   geom_col()
 ```
 We want to add information about the severity of patients’ ailments. The `drgcodes` table contains, for `DRG` codes from the All Payers Registry (APR), severity and mortality indicators. We pull the drug severity information and right-join it to our query table. 
@@ -292,7 +303,10 @@ study_admissions %>%
   left_join(study_subjects, by = "subject_id", copy = TRUE) %>%
   print() -> study_admissions
 ```
-
+Graph primary diagnosis of respiratory illness to the number of mortality.
+```{r}
+library(ISLR)
+```
 Let's try to select the patients that have a 30 day mortality rate that were admitted to the MICU primarily from respiratory illness. There is a total of 129 subjects diagnosed with respiratory illness, we have found that subjects have the icd9_code of 51881 which is acute respiratory failure.
 ```{r}
 study_admissions %>%
@@ -302,6 +316,10 @@ study_admissions %>%
 print() -> study_1
 ```
 
+Compute study_1 date which includes all demographics and information of the subjects that were diagnosed with respiratory illness.
+```{r}
+compute(study_1)
+```
 Data visualization for the number of 30-day mortality and those that have survived. About 500 patients did not survive. A little less than 400 patients were labeled NA. 
 ```{r}
 study_1 %>%
@@ -318,6 +336,24 @@ study_1 %>%
   ggplot(aes(x = gender, y = count)) +
   geom_col()
 ```
+Question 5 - Analytics. Use at least two analytical approaches to address your research hypothesis/goal. 
+**Part 1: Logistic Regression**
+```{r}
+study_admissions <- glm(mortality ~ principal_dx, data = study_admissions, family = "binomial")
+summary(study_1)
+```
+
+```{r}
+collect(study_1)
+sample_n(study_1, 3)
+set.seed(123)
+sample <- sample(c(TRUE, FALSE), nrow(default), replace = T, prob = c(0.6,0.4))
+train <- default[sample, ]
+test <- default[!sample, ]
+model <- glm( study_1, family = binomial)
+summary(model)$coef
+```
+
 
 ## Close the connection to a database
 
@@ -387,6 +423,17 @@ for (i in 1:num_of_boxes) {
   }
 ```
 
+
+5. Analytics. Use at least two analytical approaches to address your research hypothesis/goal. 
+**Part 1: Logistic Regression**
+```{r}
+collect(study_1)
+```
+
+
+
+
+**Part 2: Neural Network**
 ```{r}
 library(keras)
 install_keras(tensorflow = "gpu")

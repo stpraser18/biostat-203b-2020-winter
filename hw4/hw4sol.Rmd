@@ -327,11 +327,11 @@ study_admissionsfull %>%
   group_by(subject_id, hadm_id) %>%
   filter(row_number() == 1) %>%
   filter(seq_num == 1) %>%
-print() -> studyseq1
+print() -> study1
 ```
 Data visualization for the number of 30-day mortality and those that have survived. There are 500 deaths after 30 days and there are 390 that are labeled NA. 
 ```{r}
-studyseq1 %>%
+study1 %>%
   group_by(mortality) %>%
   summarize(count = n()) %>%
   ggplot(aes(x = mortality, y = count)) +
@@ -340,21 +340,31 @@ studyseq1 %>%
 
 Group data by gender.
 ```{r}
-studyseq1 %>%
+study1 %>%
   group_by(gender) %>%
   summarize(count = n()) %>%
   ggplot(aes(x = gender, y = count)) +
   geom_col()
 ```
+```{r}
+study1 %>%
+  select(seq_num, mortality) %>%
+  print()
+```
 
 Question 5 - Analytics. Use at least two analytical approaches to address your research hypothesis/goal. 
 **Part 1: Logistic Regression**
 ```{r}
-head(studyseq1)
+head(study1)
+```
+
+
+```{r}
+logistic_respmort <- glm(mortality ~ age + seq_num, data = study_admissionsfull, family = binomial(link = "logit"), maxit = 100)
 ```
 
 ```{r}
-summary(studyseq1)
+summary(logistic_respmort)
 ```
 
 ```{r}
@@ -367,9 +377,17 @@ summary(study_admissionsfull)
 
 
 ```{r}
-study_admissionsfull <- glm(mortality ~ seq_num, data = study_admissionsfull, family = "binomial")
+study1 <- glm(mortality ~ seq_num, data = study1, family = "binomial")
 ```
 
+```{r}
+set.seed(12345)
+
+study_1df <- as.data.frame(study_1)
+idx <- study_1df$mortality %in% c("mortality")
+study_1df <- study_1df[idx,]
+y <- ifelse(study_1df$mortality == "mortality", TRUE, NA)
+```
 
 
 **Part 2: Neural Network**
@@ -386,8 +404,8 @@ glimpse(studyseq1)
 library(rsample)
 ```
 
-#```{r}
-set.seed(800)
+```{r}
+set.seed(12345)
 train_test_split <- initial_split(study1, prop = 0.6)
 train_test_split
 ```
@@ -405,8 +423,6 @@ Close the connection:
 ```{r}
 dbDisconnect(con)
 ```
-
-
 
 
 

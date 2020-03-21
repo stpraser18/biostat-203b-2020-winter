@@ -49,6 +49,7 @@ library(RPostgreSQL)
 library(tidyverse)
 library(lubridate)
 library(dplyr)
+library(ggplot2)
 ```
 
 Credentials for using PostgreSQL database. We are going to use username `postgres` with password `postgres` to access the `mimic` database in the schemee `mimiciii`. 
@@ -318,13 +319,7 @@ study_admissionsfull %>%
   ggplot(aes(x = seq_num, y = count)) +
   geom_col()
 ```
-#STILL NEED TO DO THIS drop columns that are NA for mortality to find the true amount of those that did not survive the 30 day mortality 
-```{r}
-study_admissionsfull %>%
-  group_by(mortality) %>%
-  drop_na() %>%
-  print() -> study_admissionstrue
-```
+
 
 Let's try to select the patients that have a 30 day mortality rate that were admitted to the MICU primarily from respiratory illness. There is a total of 890 subjects primarily diagnosed with respiratory illness, we have found that subjects have the icd9_code of 51881 which is acute respiratory failure.
 ```{r}
@@ -332,51 +327,75 @@ study_admissionsfull %>%
   group_by(subject_id, hadm_id) %>%
   filter(row_number() == 1) %>%
   filter(seq_num == 1) %>%
-print() -> study_1
+print() -> studyseq1
 ```
-There are 500 deaths after 30 days and there are 390 that are labeled NA. 
+Data visualization for the number of 30-day mortality and those that have survived. There are 500 deaths after 30 days and there are 390 that are labeled NA. 
 ```{r}
-study_1 %>%
+studyseq1 %>%
   group_by(mortality) %>%
   summarize(count = n()) %>%
   ggplot(aes(x = mortality, y = count)) +
   geom_col()
 ```
-Compute study_1 date which includes all demographics and information of the subjects that were diagnosed with respiratory illness.
-```{r}
-collect(study_1)
-```
-Data visualization for the number of 30-day mortality and those that have survived. About 500 patients did not survive. A little less than 400 patients were labeled NA. 
-```{r}
-study_1 %>%
-  group_by(mortality) %>%
-  summarize(count = n()) %>%
-  ggplot(aes(x = mortality, y = count)) +
-  geom_col()
-```
+
 Group data by gender.
 ```{r}
-study_1 %>%
+studyseq1 %>%
   group_by(gender) %>%
   summarize(count = n()) %>%
   ggplot(aes(x = gender, y = count)) +
   geom_col()
 ```
+
 Question 5 - Analytics. Use at least two analytical approaches to address your research hypothesis/goal. 
 **Part 1: Logistic Regression**
 ```{r}
+head(studyseq1)
+```
+
+```{r}
+summary(studyseq1)
+```
+
+```{r}
 head(study_admissionsfull)
 ```
+
 ```{r}
 summary(study_admissionsfull)
 ```
-```{r}
-sapply(study_admissionsfull, sd)
-```
+
+
 ```{r}
 study_admissionsfull <- glm(mortality ~ seq_num, data = study_admissionsfull, family = "binomial")
 ```
 
+
+
+**Part 2: Neural Network**
+```{r}
+library(keras)
+install_keras(tensorflow = "gpu")
+```
+
+```{r}
+glimpse(studyseq1)
+```
+
+```{r}
+library(rsample)
+```
+
+#```{r}
+set.seed(800)
+train_test_split <- initial_split(study1, prop = 0.6)
+train_test_split
+```
+
+#```{r}
+study1nn <- study1(num_words = max_features)
+study$train$x[[1]]
+```
 
 
 
@@ -387,11 +406,6 @@ Close the connection:
 dbDisconnect(con)
 ```
 
-
-```{r}
-study_1 %>%
-  print()
-```
 
 
 
@@ -451,20 +465,7 @@ for (i in 1:num_of_boxes) {
 ```
 
 
-5. Analytics. Use at least two analytical approaches to address your research hypothesis/goal. 
-**Part 1: Logistic Regression**
-```{r}
-collect(study_1)
-```
 
-
-
-
-**Part 2: Neural Network**
-```{r}
-library(keras)
-install_keras(tensorflow = "gpu")
-```
 
 ## Install PostgreSQL and `RpostgreSQL` package on CentOS
 

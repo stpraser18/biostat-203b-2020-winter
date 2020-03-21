@@ -354,13 +354,11 @@ study1 %>%
 
 Question 5 - Analytics. Use at least two analytical approaches to address your research hypothesis/goal. 
 **Part 1: Logistic Regression**
-```{r}
-head(study1)
-```
 
 
 ```{r}
-logistic_respmort <- glm(mortality ~ age + seq_num, data = study_admissionsfull, family = binomial(link = "logit"), maxit = 100)
+logistic_respmort <- glm(mortality ~ age + seq_num, data = study_admissionsfull,
+                         family = binomial(link = "logit"), maxit = 100)
 ```
 
 ```{r}

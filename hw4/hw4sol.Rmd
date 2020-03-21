@@ -50,6 +50,7 @@ library(tidyverse)
 library(lubridate)
 library(dplyr)
 library(ggplot2)
+library(tibble)
 ```
 
 Credentials for using PostgreSQL database. We are going to use username `postgres` with password `postgres` to access the `mimic` database in the schemee `mimiciii`. 
@@ -357,8 +358,9 @@ Question 5 - Analytics. Use at least two analytical approaches to address your r
 
 
 ```{r}
-logistic_respmort <- glm(mortality ~ age + seq_num, data = study_admissionsfull,
-                         family = binomial(link = "logit"), maxit = 100)
+logistic_respmort <- glm(mortality ~ age + seq_num + gender + ethnic_group + 
+                     principal_dx, data = study_admissionsfull,
+                     family = binomial(link = "logit"), maxit = 100)
 ```
 
 ```{r}
@@ -366,52 +368,86 @@ summary(logistic_respmort)
 ```
 
 ```{r}
-head(study_admissionsfull)
+logistic_1 <- glm(mortality ~ seq_num, data = study1, family = binomial(link = "logit"), maxit = 100)
 ```
 
+I wanted to see if patients that were primarily diagnosed with respiratory illness were related to mortality, but it was not enough to determine the coefficients. 
 ```{r}
-summary(study_admissionsfull)
+summary(logistic_1)
 ```
-
-
-```{r}
-study1 <- glm(mortality ~ seq_num, data = study1, family = "binomial")
-```
-
-```{r}
-set.seed(12345)
-
-study_1df <- as.data.frame(study_1)
-idx <- study_1df$mortality %in% c("mortality")
-study_1df <- study_1df[idx,]
-y <- ifelse(study_1df$mortality == "mortality", TRUE, NA)
-```
-
 
 **Part 2: Neural Network**
 ```{r}
 library(keras)
-install_keras(tensorflow = "gpu")
 ```
 
 ```{r}
-glimpse(studyseq1)
+head(study_admissionsfull)
+```
+Converting tibble to data frame.
+```{r}
+study_fulldf <- as.data.frame(study_admissionsfull) 
+```
+Converting data frame into matrix
+```{r}
+data.matrix(study_fulldf)
+```
+```{r}
+
 ```
 
-```{r}
-library(rsample)
+#```{r}
+study_admissionsfull
+
+c(train_data, train_labels) %<-% study_admissionsfull$train
+c(test_data, test_labels) %<-% study_admissionsfull$test
+
+column_names <- c('subject_id', 'hadm_id', 'age', 'mortality', 'drg_severity', 'icd9_code', 'seq_num', 
+                  'principal_dx', 'gender', 'ethnic_group')
+
+train_df <- as_tibble(train_data)
+colnames(train_df) <- column_names
+
+
 ```
 
-```{r}
+#```{r}
+train_df 
+ train_df <- train_data %>% 
+    as_tibble(.name_repair = "minimal") %>% 
+    setNames(column_names) %>% 
+    mutate(label = train_labels)
+  
+  test_df <- test_data %>% 
+  as_tibble(.name_repair = "minimal") %>% 
+  setNames(column_names) %>% 
+  mutate(label = test_labels)
+```
+
+#```{r}
+model <- keras_model_sequential() %>%
+         layer_dense(units = 48,
+                     activation = "sigmoid",
+                     input_shape = 39) %>%
+         layer_dense(units = 48, activation = "sigmoid") %>%
+         layer_dense(units = 2, activation = "sigmoid")
+
+history <- model %>% keras::fit(
+  x_train,
+  y_train,
+  epochs = 500,
+  batch_size = 16,
+  validation_split = 0.7, shuffle = T
+)
+```
+
+
+#```{r}
 set.seed(12345)
 train_test_split <- initial_split(study1, prop = 0.6)
 train_test_split
 ```
 
-#```{r}
-study1nn <- study1(num_words = max_features)
-study$train$x[[1]]
-```
 
 
 
@@ -457,7 +493,7 @@ box_pos[4,] = c(0.20, vert_pos[4])
 # content of boxes
 box_content <- matrix(nrow = num_of_boxes, ncol = 1, data = 0)
 box_content[1] = "All patients in MIMIC-III \n n = 58,976" # 1st box
-box_content[2] = "Exclude patients not admitted to ICU \n n= 57,976" # 2nd box
+box_content[2] = "Exclude patients not admitted to MICU \n n= 57,976" # 2nd box
 box_content[3] = "Exclude patients not primarily diagnosed with resp \n n = 110" # 3rd box
 box_content[4] = "Study cohort \n n = 890"
 

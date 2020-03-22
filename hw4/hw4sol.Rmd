@@ -388,43 +388,24 @@ Converting tibble to data frame.
 ```{r}
 study_fulldf <- as.data.frame(study_admissionsfull) 
 ```
+
 Converting data frame into matrix
 ```{r}
-data.matrix(study_fulldf)
+study_fullma <- data.matrix(study_fulldf)
 ```
+Training portion of the data.
 ```{r}
+df <- study_fulldf
 
+idx <- sample(seq(1, 2), size = nrow(df), replace = TRUE, prob = c(.8, .2))
+train <- df[idx == 1,]
+test <- df[idx == 2,]
+
+test_df <- as_tibble(test)
+test_df
 ```
 
-#```{r}
-study_admissionsfull
-
-c(train_data, train_labels) %<-% study_admissionsfull$train
-c(test_data, test_labels) %<-% study_admissionsfull$test
-
-column_names <- c('subject_id', 'hadm_id', 'age', 'mortality', 'drg_severity', 'icd9_code', 'seq_num', 
-                  'principal_dx', 'gender', 'ethnic_group')
-
-train_df <- as_tibble(train_data)
-colnames(train_df) <- column_names
-
-
-```
-
-#```{r}
-train_df 
- train_df <- train_data %>% 
-    as_tibble(.name_repair = "minimal") %>% 
-    setNames(column_names) %>% 
-    mutate(label = train_labels)
-  
-  test_df <- test_data %>% 
-  as_tibble(.name_repair = "minimal") %>% 
-  setNames(column_names) %>% 
-  mutate(label = test_labels)
-```
-
-#```{r}
+```{r}
 model <- keras_model_sequential() %>%
          layer_dense(units = 48,
                      activation = "sigmoid",
@@ -433,8 +414,8 @@ model <- keras_model_sequential() %>%
          layer_dense(units = 2, activation = "sigmoid")
 
 history <- model %>% keras::fit(
-  x_train,
-  y_train,
+  train,
+  test,
   epochs = 500,
   batch_size = 16,
   validation_split = 0.7, shuffle = T

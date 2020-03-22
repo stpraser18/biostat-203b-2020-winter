@@ -52,9 +52,12 @@ library(DBI)
 library(RPostgreSQL)
 library(tidyverse)
 library(lubridate)
+library(plyr)
 library(dplyr)
 library(ggplot2)
 library(tibble)
+library(broom)
+library(tidyr)
 ```
 
 Credentials for using PostgreSQL database. We are going to use username `postgres` with password `postgres` to access the `mimic` database in the schemee `mimiciii`. 
@@ -314,6 +317,7 @@ Filtered the amount of subjects that were repeated.
 study_admissions %>%
   group_by(subject_id, hadm_id) %>%
   filter(row_number() == 1) %>%
+  #mutate_all(~replace(., is.na(.), 0)) %>%
   print() -> study_admissionsfull 
 ```
 Graph primary diagnosis of respiratory illness to the number of mortality.
@@ -325,6 +329,27 @@ study_admissionsfull %>%
   geom_col()
 ```
 
+
+```{r}
+study_fulldf <- as.data.frame(study_admissionsfull) 
+```
+Data frame with mortality values of 0 and 1, which are NA and TRUE, respectively. 
+```{r}
+x <- study_fulldf
+x[, 4][is.na(x[, 4])] <- 0
+head(x)
+```
+
+```{r}
+study_fulldf$mortality <- replace(study_admissionsfull$mortality, c("mortality" == 1))
+study_fulldf$mortality <- replace(study_admissionsfull$mortality, c("NA" = 0))
+head(study_fulldf)
+```
+
+```{r}
+as.integer(as.logical(study_fulldf$mortality))
+head(study_fulldf)
+```
 
 Let's try to select the patients that have a 30 day mortality rate that were admitted to the MICU primarily from respiratory illness. There is a total of 890 subjects primarily diagnosed with respiratory illness, we have found that subjects have the icd9_code of 51881 which is acute respiratory failure.
 ```{r}
@@ -360,7 +385,7 @@ study1 %>%
 Question 5 - Analytics. Use at least two analytical approaches to address your research hypothesis/goal. 
 **Part 1: Logistic Regression**
 
-This logistic regression is done to see how multiple variables affect mortality. The second logistic regression that is done after this one looks at just seq_num and age, which pertains to the hypothesis.
+This logistic regression is done to see how multiple variables affect mortality. The second logistic regression that is done after this one looks at seq_num and other variables, which can affect the 30 day mortality.
 ```{r}
 logistic_respmort <- glm(mortality ~ age + seq_num + gender + ethnic_group + 
                      principal_dx, data = study_admissionsfull,
@@ -370,7 +395,9 @@ logistic_respmort <- glm(mortality ~ age + seq_num + gender + ethnic_group +
 ```{r}
 summary(logistic_respmort)
 ```
-
+```{r}
+logistic_respmort$coef
+```
 This specific summary and logistic regression should be used for supporting the hypothesis.
 ```{r}
 logistic_seq_num <- glm(mortality ~ seq_num, data = study_admissionsfull,
@@ -380,102 +407,52 @@ logistic_seq_num <- glm(mortality ~ seq_num, data = study_admissionsfull,
 ```{r}
 summary(logistic_seq_num)
 ```
+```{r}
+M.df <- data.frame(seq_num = seq(1:5))
 
-```{r}
-logistic_respmort$coef
-```
-```{r}
-plot(logistic_respmort) 
-set.seed(1234)
-(logistic_respmort <- glm(sample(c(0, 1), size=100,
-                  replace=TRUE, prob=c(0.5, 0.5)) ~ 0 
-                  + I(0.08 * rnorm(n=100, mean=0, sd=sqrt(9))),
-                  family=binomial))$coef
-plot(logistic_respmort)
-```
-```{r}
+#Predict the Coast values (as a probability) using the above data
+M.df$mortality <- predict(logistic_seq_num, newdata=M.df, type="response")
+
+# Plot the modeled probability values
+ggplot(M.df, aes(x=seq_num, y= mortality)) + geom_line()
 
 ```
 
 ```{r}
-fit = glm(mortality ~ seq_num, data = study_admissionsfull,
+study_admissionsfull$mortality
+x_value <- data.frame(seq_num = study_admissionsfull$seq_num)
+study_admissionsfull$mortality <- predict(logistic_seq_num, newdata = x_value, type = "response")
+ggplot(x_value, aes(x = seq_num, y = study_admissionsfull$mortality)) + geom_line()
+```
+
+
+
+
+
+
+
+
+
+
+
+
+```{r}
+logistic_seq_num <- glm(mortality ~ seq_num, data = study_admissionsfull,
                      family = binomial(link = "logit"), maxit = 100)
-newdat <- data.frame(seq_num = seq(min(1), max(5),len=100))
-newdat$mortality = predict(fit, newdata = newdat, type="response")
-plot(age, mortality, data = study_admissionfull, col="red4")
-lines(mortality ~ age, newdat, col="green4", lwd=2)
-```
-```{r}
-mydf <- merge(study_admissionsfull, probs, by="position")
-
-```
-Plotting Logistic Regression 
-```{r}
-b0 <- logistic_respmort$coef[1] # intercept
-age <- logistic_respmort$coef[2]
-seq_num <- logistic_respmort$coef[3]
-genderM <- logistic_respmort$coef[4]
-ethnic_groupBLACK <- logistic_respmort$coef[5]
-ethnic_groupHISPANIC <- logistic_respmort$coef[6]
-ethnic_groupUNKNOWN <- logistic_respmort$coef[7]
-ethnic_groupWHITE <- logistic_respmort$coef[8]
-principal_dxTRUE <- logistic_respmort$coef[9]
-
-range <- seq( 0, 10, .01 )
-
-logodds_var_1 <- b0 + age * range
-logodds_var_2 <- b0 + seq_num * range
-logodds_var_3 <- b0 + genderM * range
-logodds_var_4 <- b0 + ethnic_groupBLACK * range
-logodds_var_5 <- b0 + ethnic_groupHISPANIC * range
-logodds_var_6 <- b0 + ethnic_groupUNKNOWN * range
-logodds_var_7 <- b0 + ethnic_groupWHITE * range
-logodds_var_8 <- b0 + principal_dxTRUE * range
-
-prob_var_1 <- exp(logodds_var_1) / (1+exp(logodds_var_1))
-prob_var_2 <- exp(logodds_var_2) / (1+exp(logodds_var_2))
-prob_var_3 <- exp(logodds_var_3) / (1+exp(logodds_var_3))
-prob_var_4 <- exp(logodds_var_4) / (1+exp(logodds_var_4))
-prob_var_5 <- exp(logodds_var_5) / (1+exp(logodds_var_5))
-prob_var_6 <- exp(logodds_var_6) / (1+exp(logodds_var_6))
-prob_var_7 <- exp(logodds_var_7) / (1+exp(logodds_var_7))
-prob_var_8 <- exp(logodds_var_8) / (1+exp(logodds_var_8))
-
-plot( x=range, y=prob_var_1, type="l" )
-plot( x=range, y=prob_var_2, type="l" )
-plot( x=range, y=prob_var_3, type="l" )
-plot( x=range, y=prob_var_4, type="l" )
-plot( x=range, y=prob_var_5, type="l" )
-plot( x=range, y=prob_var_6, type="l" )
-plot( x=range, y=prob_var_7, type="l" )
-plot( x=range, y=prob_var_8, type="l" )
-
-```
-```{r}
-
 ```
 
 ```{r}
-age_range <- seq(from=min(0), to=max(100), by=.01)
+newdf <- data.frame(x = seq(0, 1, length.out = 100))
+
+newdf$pout_logit <- predict(logistic_seq_num, newdf, se.fit = TRUE, type = "response")$fit
+newdf$pse_logit <- predict(logistic_seq_num, newdf, se.fit = TRUE, type = "response")$se.fit
+newdf$pupper_logit <- newdf$pout_logit + (1.96 * newdf$pse_logit)  # 95% CI upper bound
+newdf$plower_logit <- newdf$pout_logit - (1.96 * newdf$pse_logit)  # 95% CI lower bound
+with(newdf, plot(pout_logit ~ x, type = "l", lwd = 2))
+with(newdf, lines(pupper_logit ~ x, type = "l", lty = 2))
+with(newdf, lines(plower_logit ~ x, type = "l", lty = 2))
 ```
 
-```{r}
-study_fulldf <- as.data.frame(study_admissionsfull) 
-```
-
-```{r}
-size <- 100
-set.seed(12345)
-
-dat <- data.frame(
-  seq_num =  rbinom(size, 1,5),
-  mortality = rbinom(ssize,0,1)
-)
-dat$FossilRecord = rbinom(ssize,1,(.3 + .1*dat$Basin + 0.04*dat$GeographicRange))
-
-##fitting model
-fit <- glm(FossilRecord ~ Basin + GeographicRange, family=binomial(), data=dat)
-```
 
 ```{r}
 logistic_1 <- glm(mortality ~ seq_num, data = study1, family = binomial(link = "logit"), maxit = 100)
@@ -558,12 +535,6 @@ model <- keras_model_sequential() %>%
 
 ```
 
-
-#```{r}
-set.seed(12345)
-train_test_split <- initial_split(study1, prop = 0.6)
-train_test_split
-```
 
 
 

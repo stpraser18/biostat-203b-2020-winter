@@ -23,7 +23,11 @@ In this assignment, you are to write a report analyzing the electronic health re
 
 3. Data preparation. Create a study cohort from MIMIC-III corresponding to your research hypothesis/goal. See the examplary code below. Use a CONSORT flow diagram to summarize your steps to create the cohort.
 
+**Solution:** The cohorts that were generalized were the patients that excluded those that were not admitted to the MICU and the patients that were not primarily diagnosed with respiratory illness. 
+
 4. Data visualization. Use visualization to summarize the cohort you created. 
+
+**Solution:** There were a couple of data visualizations, but the focus is looking at those that were primarily diagnosed with respiratory illness, which are seq_1 and the total counts of mortality so we can see if there was a trend in death. In this case, we could also see how many others that were not primarily diagnosed with respiratory illness, which turns out to be more than those that were primarily diagnosed. 
 
 5. Analytics. Use at least two analytical approaches to address your research hypothesis/goal. For example, we can use (1) logistic regression and (2) neural network to build a predictive model for the 30-day mortality rate of patients admitted into the MICU and compare their predictive performance. Summarize your results in graphs.
 
@@ -356,7 +360,7 @@ study1 %>%
 Question 5 - Analytics. Use at least two analytical approaches to address your research hypothesis/goal. 
 **Part 1: Logistic Regression**
 
-
+This logistic regression is done to see how multiple variables affect mortality. The second logistic regression that is done after this one looks at just seq_num and age, which pertains to the hypothesis.
 ```{r}
 logistic_respmort <- glm(mortality ~ age + seq_num + gender + ethnic_group + 
                      principal_dx, data = study_admissionsfull,
@@ -365,6 +369,112 @@ logistic_respmort <- glm(mortality ~ age + seq_num + gender + ethnic_group +
 
 ```{r}
 summary(logistic_respmort)
+```
+
+This specific summary and logistic regression should be used for supporting the hypothesis.
+```{r}
+logistic_seq_num <- glm(mortality ~ seq_num, data = study_admissionsfull,
+                     family = binomial(link = "logit"), maxit = 100)
+```
+
+```{r}
+summary(logistic_seq_num)
+```
+
+```{r}
+logistic_respmort$coef
+```
+```{r}
+plot(logistic_respmort) 
+set.seed(1234)
+(logistic_respmort <- glm(sample(c(0, 1), size=100,
+                  replace=TRUE, prob=c(0.5, 0.5)) ~ 0 
+                  + I(0.08 * rnorm(n=100, mean=0, sd=sqrt(9))),
+                  family=binomial))$coef
+plot(logistic_respmort)
+```
+```{r}
+
+```
+
+```{r}
+fit = glm(mortality ~ seq_num, data = study_admissionsfull,
+                     family = binomial(link = "logit"), maxit = 100)
+newdat <- data.frame(seq_num = seq(min(1), max(5),len=100))
+newdat$mortality = predict(fit, newdata = newdat, type="response")
+plot(age, mortality, data = study_admissionfull, col="red4")
+lines(mortality ~ age, newdat, col="green4", lwd=2)
+```
+```{r}
+mydf <- merge(study_admissionsfull, probs, by="position")
+
+```
+Plotting Logistic Regression 
+```{r}
+b0 <- logistic_respmort$coef[1] # intercept
+age <- logistic_respmort$coef[2]
+seq_num <- logistic_respmort$coef[3]
+genderM <- logistic_respmort$coef[4]
+ethnic_groupBLACK <- logistic_respmort$coef[5]
+ethnic_groupHISPANIC <- logistic_respmort$coef[6]
+ethnic_groupUNKNOWN <- logistic_respmort$coef[7]
+ethnic_groupWHITE <- logistic_respmort$coef[8]
+principal_dxTRUE <- logistic_respmort$coef[9]
+
+range <- seq( 0, 10, .01 )
+
+logodds_var_1 <- b0 + age * range
+logodds_var_2 <- b0 + seq_num * range
+logodds_var_3 <- b0 + genderM * range
+logodds_var_4 <- b0 + ethnic_groupBLACK * range
+logodds_var_5 <- b0 + ethnic_groupHISPANIC * range
+logodds_var_6 <- b0 + ethnic_groupUNKNOWN * range
+logodds_var_7 <- b0 + ethnic_groupWHITE * range
+logodds_var_8 <- b0 + principal_dxTRUE * range
+
+prob_var_1 <- exp(logodds_var_1) / (1+exp(logodds_var_1))
+prob_var_2 <- exp(logodds_var_2) / (1+exp(logodds_var_2))
+prob_var_3 <- exp(logodds_var_3) / (1+exp(logodds_var_3))
+prob_var_4 <- exp(logodds_var_4) / (1+exp(logodds_var_4))
+prob_var_5 <- exp(logodds_var_5) / (1+exp(logodds_var_5))
+prob_var_6 <- exp(logodds_var_6) / (1+exp(logodds_var_6))
+prob_var_7 <- exp(logodds_var_7) / (1+exp(logodds_var_7))
+prob_var_8 <- exp(logodds_var_8) / (1+exp(logodds_var_8))
+
+plot( x=range, y=prob_var_1, type="l" )
+plot( x=range, y=prob_var_2, type="l" )
+plot( x=range, y=prob_var_3, type="l" )
+plot( x=range, y=prob_var_4, type="l" )
+plot( x=range, y=prob_var_5, type="l" )
+plot( x=range, y=prob_var_6, type="l" )
+plot( x=range, y=prob_var_7, type="l" )
+plot( x=range, y=prob_var_8, type="l" )
+
+```
+```{r}
+
+```
+
+```{r}
+age_range <- seq(from=min(0), to=max(100), by=.01)
+```
+
+```{r}
+study_fulldf <- as.data.frame(study_admissionsfull) 
+```
+
+```{r}
+size <- 100
+set.seed(12345)
+
+dat <- data.frame(
+  seq_num =  rbinom(size, 1,5),
+  mortality = rbinom(ssize,0,1)
+)
+dat$FossilRecord = rbinom(ssize,1,(.3 + .1*dat$Basin + 0.04*dat$GeographicRange))
+
+##fitting model
+fit <- glm(FossilRecord ~ Basin + GeographicRange, family=binomial(), data=dat)
 ```
 
 ```{r}
@@ -395,31 +505,57 @@ study_fullma <- data.matrix(study_fulldf)
 ```
 Training portion of the data.
 ```{r}
+
+max_features <- 200000
+batch <- 32
+
+maxlen <- 80
+
 df <- study_fulldf
 
 idx <- sample(seq(1, 2), size = nrow(df), replace = TRUE, prob = c(.8, .2))
-train <- df[idx == 1,]
-test <- df[idx == 2,]
+x.train <- df[idx == 1,]
+y.train <- df[idx == 2,]
+x.test <- df[idx == 1,]
+y.test <- df[idx == 2,]
+#validation <- df[idx == 3] if needed use the 3rd probability
 
-test_df <- as_tibble(test)
-test_df
+cat(length(x.train), 'train sequences\n')
+cat(length(x.test), 'test sequences\n')
+
+#test_df <- as_tibble(test)
+#test_df
+```
+```{r}
+library(keras)
+install_keras(tensorflow = "gpu")
+```
+
+```{r}
+model <- keras_model_sequential() 
+
+model %>%
+  layer_dense(units = 64, activation = "relu", input_shape = ncol(x_data)) %>%
+  layer_dense(units = 64, activation = "relu") %>%
+  layer_dense(units = ncol(y_data_oneh), activation = "softmax")
+
+# Try using different optimizers and different optimizer configs
+model %>% compile(
+  loss = 'binary_crossentropy',
+  optimizer = 'adam',
+  metrics = c('accuracy')
+)
+summary(model)
 ```
 
 ```{r}
 model <- keras_model_sequential() %>%
-         layer_dense(units = 48,
+         layer_dense(units = 5,
                      activation = "sigmoid",
-                     input_shape = 39) %>%
-         layer_dense(units = 48, activation = "sigmoid") %>%
-         layer_dense(units = 2, activation = "sigmoid")
+                     input_shape = dim_desc(train)) %>%
+         layer_dense(units = 5, activation = "sigmoid") %>%
+         layer_dense(units = 1)
 
-history <- model %>% keras::fit(
-  train,
-  test,
-  epochs = 500,
-  batch_size = 16,
-  validation_split = 0.7, shuffle = T
-)
 ```
 
 

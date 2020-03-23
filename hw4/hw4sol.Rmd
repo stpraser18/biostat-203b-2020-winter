@@ -30,8 +30,22 @@ In this assignment, you are to write a report analyzing the electronic health re
 **Solution:** There were a couple of data visualizations, but the focus is looking at those that were primarily diagnosed with respiratory illness, which are seq_1 and the total counts of mortality so we can see if there was a trend in death. In this case, we could also see how many others that were not primarily diagnosed with respiratory illness, which turns out to be more than those that were primarily diagnosed. 
 
 5. Analytics. Use at least two analytical approaches to address your research hypothesis/goal. For example, we can use (1) logistic regression and (2) neural network to build a predictive model for the 30-day mortality rate of patients admitted into the MICU and compare their predictive performance. Summarize your results in graphs.
+**Solution:** A logistic regression was performed by looking at seq_num and mortality, but the data for both of the variables are discrete rather than continuous thus a linear graph was shown. A neural network was supposed to be built, but it crashed. I provided some examples of what the model should look like, splitting the data to train and test that worked, but not through the model. 
 
 6. Conclusions. 
+**Solution:** Based on the graphs that were displayed before doing part 5, shows that the combination of seq_num of 2-5 all together had a much higher mortality rate than seq_num = 1. Just in seq_num = 1, there are about 500 deaths and about 390 that were labeled NA, thus showing that there could is a slightly higher chance of dying, maybe with the contribution of other variables. Based on the linear regression, it seems like the higher the seq_num, the lower the mortality. 
+
+Note: There are some commands that didn't seem to work, even though it wasn't changed. Just in case, I have some screenshots of the logistic regression that I was able to do. 
+
+<p align="center">
+  <img src="./glm1.png" height="350" width="500">
+</p>
+
+<p align="center">
+  <img src="./glm2.png" height="350" width="500">
+</p>
+
+
 
 # Learning resources about analyzing EHR data
 
@@ -56,7 +70,6 @@ library(plyr)
 library(dplyr)
 library(ggplot2)
 library(tibble)
-library(broom)
 library(tidyr)
 ```
 
@@ -133,13 +146,7 @@ tbl(con, "transfers") %>%
   group_by(subject_id, hadm_id) %>%
 print() -> all_admissions
 ```
-```{r}
-all_admissions %>%
-  group_by(curr_careunit) %>%
-  summarize(count = n()) %>%
-  ggplot(aes(x = curr_careunit, y = count)) +
-  geom_col()
-```
+
 Restrict to patients with respiratory illness. Found all possible ICD-9 codes related to respiratory illnesses, we search for the string 'tuberculosis' in the column long_title from the table d_icd_diagnoses. There are 92 codes that deal with respiratory illnesses. 
 ```{r}
 tbl(con, "d_icd_diagnoses") %>%
@@ -190,13 +197,14 @@ study_admissions %>%
   ggplot(aes(x = principal_dx, y = count)) +
   geom_col()
 ```
+
 We want to add information about the severity of patients’ ailments. The `drgcodes` table contains, for `DRG` codes from the All Payers Registry (APR), severity and mortality indicators. We pull the drug severity information and right-join it to our query table. 
 ```{r}
 tbl(con, "drgcodes") %>%
   filter(str_detect(drg_type, "APR")) %>%
   select(subject_id, hadm_id, drg_severity) %>%
   right_join(study_admissions, by = c("subject_id", "hadm_id")) %>%
-  mutate(drg_severity = ifelse(is.na(drg_severity), 1, drg_severity)) %>%
+  #mutate(drg_severity = ifelse(is.na(drg_severity), 1, drg_severity)) %>%
   print() -> study_admissions
 ```
 
@@ -312,6 +320,7 @@ study_admissions %>%
   left_join(study_subjects, by = "subject_id", copy = TRUE) %>%
   print() -> study_admissions
 ```
+
 Filtered the amount of subjects that were repeated. 
 ```{r}
 study_admissions %>%
@@ -320,15 +329,6 @@ study_admissions %>%
   #mutate_all(~replace(., is.na(.), 0)) %>%
   print() -> study_admissionsfull 
 ```
-Graph primary diagnosis of respiratory illness to the number of mortality.
-```{r}
-study_admissionsfull %>%
-  group_by(seq_num, mortality) %>%
-  summarize(count = n()) %>%
-  ggplot(aes(x = seq_num, y = count)) +
-  geom_col()
-```
-
 
 Let's try to select the patients that have a 30 day mortality rate that were admitted to the MICU primarily from respiratory illness. There is a total of 890 subjects primarily diagnosed with respiratory illness, we have found that subjects have the icd9_code of 51881 which is acute respiratory failure.
 ```{r}
@@ -338,6 +338,15 @@ study_admissionsfull %>%
   filter(seq_num == 1) %>%
 print() -> study1
 ```
+ Graph primary diagnosis of respiratory illness to the number of mortality.
+```{r}
+study_admissionsfull %>%
+  group_by(seq_num, mortality) %>%
+  summarize(count = n()) %>%
+  ggplot(aes(x = seq_num, y = count)) +
+  geom_col()
+```
+
 Data visualization for the number of 30-day mortality and those that have survived. There are 500 deaths after 30 days and there are 390 that are labeled NA. 
 ```{r}
 study1 %>%
@@ -346,20 +355,15 @@ study1 %>%
   ggplot(aes(x = mortality, y = count)) +
   geom_col()
 ```
-
-Group data by gender.
+Grouped by careunits. 
 ```{r}
-study1 %>%
-  group_by(gender) %>%
+all_admissions %>%
+  group_by(curr_careunit) %>%
   summarize(count = n()) %>%
-  ggplot(aes(x = gender, y = count)) +
+  ggplot(aes(x = curr_careunit, y = count)) +
   geom_col()
 ```
-```{r}
-study1 %>%
-  select(seq_num, mortality) %>%
-  print()
-```
+
 ```{r}
 study_fulldf <- as.data.frame(study_admissionsfull) 
 ```
@@ -418,54 +422,11 @@ ggplot(x, aes(x=seq_num, y=as.numeric(x$mortality))) +
   ylab("mortality") 
 ```
 
-```{r}
-study_admissionsfull$mortality
-x_value <- data.frame(seq_num = study_admissionsfull$seq_num)
-study_admissionsfull$mortality <- predict(logistic_seq_num, newdata = x_value, type = "response")
-ggplot(x_value, aes(x = seq_num, y = study_admissionsfull$mortality)) + geom_line()
-```
-
-
-
-
-
-
-
-
-
-
-
-
-```{r}
-logistic_seq_num <- glm(mortality ~ seq_num, data = study_admissionsfull,
-                     family = binomial(link = "logit"), maxit = 100)
-```
-
-```{r}
-newdf <- data.frame(x = seq(0, 1, length.out = 100))
-
-newdf$pout_logit <- predict(logistic_seq_num, newdf, se.fit = TRUE, type = "response")$fit
-newdf$pse_logit <- predict(logistic_seq_num, newdf, se.fit = TRUE, type = "response")$se.fit
-newdf$pupper_logit <- newdf$pout_logit + (1.96 * newdf$pse_logit)  # 95% CI upper bound
-newdf$plower_logit <- newdf$pout_logit - (1.96 * newdf$pse_logit)  # 95% CI lower bound
-with(newdf, plot(pout_logit ~ x, type = "l", lwd = 2))
-with(newdf, lines(pupper_logit ~ x, type = "l", lty = 2))
-with(newdf, lines(plower_logit ~ x, type = "l", lty = 2))
-```
-
-
-```{r}
-logistic_1 <- glm(mortality ~ seq_num, data = study1, family = binomial(link = "logit"), maxit = 100)
-```
-
-I wanted to see if patients that were primarily diagnosed with respiratory illness were related to mortality, but it was not enough to determine the coefficients. 
-```{r}
-summary(logistic_1)
-```
 
 **Part 2: Neural Network**
 ```{r}
 library(keras)
+install_keras(tensorflow = "gpu")
 ```
 
 ```{r}
@@ -503,11 +464,8 @@ cat(length(x.test), 'test sequences\n')
 #test_df <- as_tibble(test)
 #test_df
 ```
-```{r}
-library(keras)
-install_keras(tensorflow = "gpu")
-```
 
+Examples of model building, but the model crashes also keras_model_sequential cannot be found.
 ```{r}
 model <- keras_model_sequential() 
 
@@ -516,7 +474,6 @@ model %>%
   layer_dense(units = 64, activation = "relu") %>%
   layer_dense(units = ncol(y_data_oneh), activation = "softmax")
 
-# Try using different optimizers and different optimizer configs
 model %>% compile(
   loss = 'binary_crossentropy',
   optimizer = 'adam',
@@ -534,9 +491,6 @@ model <- keras_model_sequential() %>%
          layer_dense(units = 1)
 
 ```
-
-
-
 
 
 ## Close the connection to a database

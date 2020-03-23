@@ -330,27 +330,6 @@ study_admissionsfull %>%
 ```
 
 
-```{r}
-study_fulldf <- as.data.frame(study_admissionsfull) 
-```
-Data frame with mortality values of 0 and 1, which are NA and TRUE, respectively. 
-```{r}
-x <- study_fulldf
-x[, 4][is.na(x[, 4])] <- 0
-head(x)
-```
-
-```{r}
-study_fulldf$mortality <- replace(study_admissionsfull$mortality, c("mortality" == 1))
-study_fulldf$mortality <- replace(study_admissionsfull$mortality, c("NA" = 0))
-head(study_fulldf)
-```
-
-```{r}
-as.integer(as.logical(study_fulldf$mortality))
-head(study_fulldf)
-```
-
 Let's try to select the patients that have a 30 day mortality rate that were admitted to the MICU primarily from respiratory illness. There is a total of 890 subjects primarily diagnosed with respiratory illness, we have found that subjects have the icd9_code of 51881 which is acute respiratory failure.
 ```{r}
 study_admissionsfull %>%
@@ -381,6 +360,15 @@ study1 %>%
   select(seq_num, mortality) %>%
   print()
 ```
+```{r}
+study_fulldf <- as.data.frame(study_admissionsfull) 
+```
+Data frame with mortality values of 0 and 1, which are NA and TRUE, respectively. 
+```{r}
+x <- study_fulldf
+x[, 4][is.na(x[, 4])] <- 0
+head(x)
+```
 
 Question 5 - Analytics. Use at least two analytical approaches to address your research hypothesis/goal. 
 **Part 1: Logistic Regression**
@@ -395,18 +383,20 @@ logistic_respmort <- glm(mortality ~ age + seq_num + gender + ethnic_group +
 ```{r}
 summary(logistic_respmort)
 ```
+
 ```{r}
 logistic_respmort$coef
 ```
 This specific summary and logistic regression should be used for supporting the hypothesis.
 ```{r}
-logistic_seq_num <- glm(mortality ~ seq_num, data = study_admissionsfull,
+logistic_seq_num <- glm(mortality ~ seq_num, data = x,
                      family = binomial(link = "logit"), maxit = 100)
 ```
 
 ```{r}
 summary(logistic_seq_num)
 ```
+Tried to graph a logistic regression, but this was resulted instead. From this graph, those that are primarily diagnosed with respiratory illness is more likely to die within 30 days compared to the higher seq_num. 
 ```{r}
 M.df <- data.frame(seq_num = seq(1:5))
 
@@ -416,6 +406,16 @@ M.df$mortality <- predict(logistic_seq_num, newdata=M.df, type="response")
 # Plot the modeled probability values
 ggplot(M.df, aes(x=seq_num, y= mortality)) + geom_line()
 
+```
+```{r}
+as.numeric(x$mortality)
+```
+Tried to plot data from seq_num and mortality, but not the most meaningful representation.  
+```{r}
+ggplot(x, aes(x=seq_num, y=as.numeric(x$mortality))) + 
+  geom_point(alpha=.5) +
+  stat_smooth(method="glm", se=FALSE, method.args = list(family=binomial)) + 
+  ylab("mortality") 
 ```
 
 ```{r}
